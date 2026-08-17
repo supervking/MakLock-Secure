@@ -40,6 +40,12 @@
 "In range" = "In range";
 "Incorrect password. Please try again." = "Incorrect password. Please try again.";
 "Launch MakLock at login" = "Launch MakLock at login";
+"Language" = "Language";
+"Language changes apply after restarting MakLock." = "Language changes apply after restarting MakLock.";
+"Follow System" = "Follow System";
+"English" = "English";
+"Simplified Chinese" = "Simplified Chinese";
+"Restart MakLock" = "Restart MakLock";
 "Lock any macOS app with Touch ID or password." = "Lock any macOS app with Touch ID or password.";
 "Lock apps after idle timeout" = "Lock apps after idle timeout";
 "Lock apps when Mac sleeps" = "Lock apps when Mac sleeps";

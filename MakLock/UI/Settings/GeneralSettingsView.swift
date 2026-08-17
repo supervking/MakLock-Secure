@@ -1,9 +1,12 @@
+import AppKit
 import SwiftUI
 import ServiceManagement
 
 /// General settings tab: launch at login, idle auto-lock, sleep auto-lock.
 struct GeneralSettingsView: View {
     @State private var settings = Defaults.shared.appSettings
+    @AppStorage("languageOverride") private var languageOverride = AppLanguage.followSystem.rawValue
+    @State private var languageRestartRequired = false
     private let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     private let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
 
@@ -48,6 +51,28 @@ struct GeneralSettingsView: View {
                             .frame(width: 50, alignment: .trailing)
                             .monospacedDigit()
                     }
+                }
+            }
+
+            Section {
+                Picker("Language", selection: $languageOverride) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(language.title)
+                            .tag(language.rawValue)
+                    }
+                }
+
+                if languageRestartRequired {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Language changes apply after restarting MakLock.")
+                            .font(MakLockTypography.caption)
+                            .foregroundColor(MakLockColors.textSecondary)
+
+                        PrimaryButton("Restart MakLock", icon: "arrow.clockwise") {
+                            restartMakLock()
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
             }
 
@@ -109,6 +134,10 @@ struct GeneralSettingsView: View {
         .onChange(of: settings.launchAtLogin) { _ in save() }
         .onChange(of: settings.lockOnSleep) { _ in save() }
         .onChange(of: settings.lockOnIdle) { _ in save() }
+        .onChange(of: languageOverride) { selection in
+            AppLanguage.apply(selection)
+            languageRestartRequired = true
+        }
     }
 
     private func save() {
@@ -138,5 +167,53 @@ struct GeneralSettingsView: View {
         } catch {
             NSLog("[MakLock] Failed to update login item: %@", error.localizedDescription)
         }
+    }
+
+    private func restartMakLock() {
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = true
+        configuration.createsNewApplicationInstance = true
+
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, error in
+            if let error {
+                NSLog("[MakLock] Failed to restart after language change: %@", error.localizedDescription)
+                return
+            }
+
+            DispatchQueue.main.async {
+                NSApp.terminate(nil)
+            }
+        }
+    }
+}
+
+private enum AppLanguage: String, CaseIterable, Identifiable {
+    case followSystem
+    case english
+    case simplifiedChinese
+
+    var id: String { rawValue }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .followSystem:
+            "Follow System"
+        case .english:
+            "English"
+        case .simplifiedChinese:
+            "Simplified Chinese"
+        }
+    }
+
+    static func apply(_ selection: String) {
+        switch Self(rawValue: selection) ?? .followSystem {
+        case .followSystem:
+            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+        case .english:
+            UserDefaults.standard.set(["en"], forKey: "AppleLanguages")
+        case .simplifiedChinese:
+            UserDefaults.standard.set(["zh-Hans"], forKey: "AppleLanguages")
+        }
+        UserDefaults.standard.synchronize()
     }
 }

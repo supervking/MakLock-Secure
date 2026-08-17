@@ -24,7 +24,7 @@
 
 请从 [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest) 下载当前版本。
 
-推荐下载 `MakLock-1.1.1-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
+推荐下载 `MakLock-1.1.2-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
 
 > 当前发布包使用 ad-hoc 本地签名，尚未经过 Apple 公证。首次打开时，macOS 可能要求你在“系统设置 → 隐私与安全性”中确认打开。请在打开前核对发布页提供的 SHA-256 校验文件。
 
@@ -48,6 +48,7 @@ MakLock Secure 是基于 [MakLock](https://github.com/dutkiewiczmaciej/MakLock) 
 - 可为指定受保护应用启用自动关闭
 - 首次启动引导与菜单栏设置
 - 英文、简体中文界面
+- 应用内语言选择：跟随系统、English 或简体中文
 
 ## 安装步骤
 
@@ -55,6 +56,8 @@ MakLock Secure 是基于 [MakLock](https://github.com/dutkiewiczmaciej/MakLock) 
 2. 将 DMG 与发布页的 `.sha256` 校验文件进行比对。
 3. 打开 DMG，把 `MakLock.app` 拖到“应用程序”。
 4. 打开 MakLock，先设置备用密码，再添加需要保护的应用。
+
+如需切换界面语言，请打开“设置 → 通用 → 语言”，选择“跟随系统”、“English”或“简体中文”，再点“重新启动 MakLock”。
 
 ## 从源码构建
 
