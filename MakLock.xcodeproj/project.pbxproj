@@ -52,7 +52,6 @@
 		A10000000000000000000D01 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000D11 /* OnboardingView.swift */; };
 		A10000000000000000000D02 /* OnboardingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000D12 /* OnboardingWindow.swift */; };
 		A10000000000000000000E01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000E11 /* AboutView.swift */; };
-		A10000000000000000000F03 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000F02 /* HotKey */; };
 		A10000000000000000001001 /* SettingsAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001011 /* SettingsAuthService.swift */; };
 		A10000000000000000001101 /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001111 /* UpdateService.swift */; };
 		A10000000000000000001203 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000001202 /* Sparkle */; };
@@ -118,7 +117,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000000000000000000F03 /* HotKey in Frameworks */,
 				A10000000000000000001203 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -335,7 +333,6 @@
 			);
 			name = MakLock;
 			packageProductDependencies = (
-				A10000000000000000000F02 /* HotKey */,
 				A10000000000000000001202 /* Sparkle */,
 			);
 			productName = MakLock;
@@ -368,7 +365,6 @@
 			);
 			mainGroup = A10000000000000000000030;
 			packageReferences = (
-				A10000000000000000000F01 /* XCRemoteSwiftPackageReference "HotKey" */,
 				A10000000000000000001201 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = A10000000000000000000034 /* Products */;
@@ -593,7 +589,7 @@
 				CODE_SIGN_ENTITLEMENTS = MakLock/Resources/MakLock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MakLock/Resources/Info.plist;
@@ -603,7 +599,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.makmak.MakLock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = NO;
@@ -620,7 +616,7 @@
 				CODE_SIGN_ENTITLEMENTS = MakLock/Resources/MakLock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MakLock/Resources/Info.plist;
@@ -630,7 +626,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.makmak.MakLock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = YES;
@@ -665,14 +661,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		A10000000000000000000F01 /* XCRemoteSwiftPackageReference "HotKey" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/soffes/HotKey";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.1;
-			};
-		};
 		A10000000000000000001201 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -684,11 +672,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		A10000000000000000000F02 /* HotKey */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A10000000000000000000F01 /* XCRemoteSwiftPackageReference "HotKey" */;
-			productName = HotKey;
-		};
 		A10000000000000000001202 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A10000000000000000001201 /* XCRemoteSwiftPackageReference "Sparkle" */;

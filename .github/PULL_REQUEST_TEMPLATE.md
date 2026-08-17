@@ -11,5 +11,5 @@
 <!-- How was this tested? -->
 
 - [ ] Tested with Chess.app
-- [ ] Panic key verified (`Cmd+Opt+Shift+Ctrl+U`)
+- [ ] Protected app cannot be dismissed without authentication
 - [ ] Builds without warnings

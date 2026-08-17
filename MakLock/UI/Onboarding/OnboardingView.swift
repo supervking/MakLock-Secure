@@ -1,12 +1,12 @@
 import SwiftUI
 import ServiceManagement
 
-/// First-launch onboarding view with welcome, safety tutorial, password setup, and finish.
+/// First-launch onboarding view with welcome, password setup, and finish.
 struct OnboardingView: View {
     @State private var currentStep = 0
     let onComplete: () -> Void
 
-    private let totalSteps = 5
+    private let totalSteps = 4
 
     private let infoSteps: [Int: OnboardingInfoStep] = [
         0: OnboardingInfoStep(
@@ -14,14 +14,13 @@ struct OnboardingView: View {
             title: "Welcome to MakLock",
             description: "Lock any macOS app with Touch ID or password.\nYour apps, your privacy."
         ),
-        // Step 1 = Panic Key (custom view with visual keycaps)
-        // Step 2 = Password Setup (custom view)
-        3: OnboardingInfoStep(
+        // Step 1 = Password Setup (custom view)
+        2: OnboardingInfoStep(
             icon: "plus.app.fill",
             title: "Add Apps to Protect",
             description: "Open Settings → Apps to choose which applications require authentication.\n\nStart with a test app like Chess."
         )
-        // Step 4 = Final Step (custom view with Launch at Login toggle)
+        // Step 3 = Final Step (custom view with Launch at Login toggle)
     ]
 
     var body: some View {
@@ -29,10 +28,8 @@ struct OnboardingView: View {
             Group {
                 switch currentStep {
                 case 1:
-                    PanicKeyStep()
-                case 2:
                     PasswordSetupStep(onContinue: { advanceStep() })
-                case 4:
+                case 3:
                     FinalStep()
                 default:
                     if let info = infoSteps[currentStep] {
@@ -56,7 +53,7 @@ struct OnboardingView: View {
                 Spacer()
 
                 // Password step handles its own button
-                if currentStep != 2 {
+                if currentStep != 1 {
                     if currentStep < totalSteps - 1 {
                         PrimaryButton("Continue") {
                             advanceStep()
@@ -109,86 +106,6 @@ private struct InfoStepView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             Spacer()
-        }
-    }
-}
-
-// MARK: - Panic Key Step
-
-private struct PanicKeyStep: View {
-    var body: some View {
-        VStack(spacing: 20) {
-            Spacer()
-
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 48))
-                .foregroundColor(MakLockColors.gold)
-                .frame(height: 60)
-
-            Text("Emergency Panic Key")
-                .font(MakLockTypography.largeTitle)
-                .foregroundColor(MakLockColors.textPrimary)
-
-            Text("If you ever get locked out, this shortcut\ninstantly dismisses all overlays:")
-                .font(MakLockTypography.body)
-                .foregroundColor(MakLockColors.textSecondary)
-                .multilineTextAlignment(.center)
-
-            // Visual keyboard shortcut
-            HStack(spacing: 6) {
-                KeyCap("⌘", label: "Command")
-                Text("+").foregroundColor(MakLockColors.textSecondary)
-                KeyCap("⌥", label: "Option")
-                Text("+").foregroundColor(MakLockColors.textSecondary)
-                KeyCap("⇧", label: "Shift")
-                Text("+").foregroundColor(MakLockColors.textSecondary)
-                KeyCap("⌃", label: "Control")
-                Text("+").foregroundColor(MakLockColors.textSecondary)
-                KeyCap("U", label: nil)
-            }
-            .padding(.vertical, 8)
-
-            Text("Try it now — it always works, even in full screen.")
-                .font(MakLockTypography.caption)
-                .foregroundColor(MakLockColors.textSecondary)
-                .multilineTextAlignment(.center)
-
-            Spacer()
-        }
-    }
-}
-
-/// A visual keyboard key cap.
-private struct KeyCap: View {
-    let symbol: String
-    let label: LocalizedStringKey?
-
-    init(_ symbol: String, label: LocalizedStringKey?) {
-        self.symbol = symbol
-        self.label = label
-    }
-
-    var body: some View {
-        VStack(spacing: 2) {
-            Text(symbol)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundColor(MakLockColors.textPrimary)
-                .frame(width: 36, height: 36)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(MakLockColors.cardDark)
-                        .shadow(color: .black.opacity(0.4), radius: 1, y: 2)
-                )
-
-            if let label {
-                Text(label)
-                    .font(.system(size: 8))
-                    .foregroundColor(MakLockColors.textSecondary)
-            } else {
-                Text(" ")
-                    .font(.system(size: 8))
-                    .foregroundColor(.clear)
-            }
         }
     }
 }

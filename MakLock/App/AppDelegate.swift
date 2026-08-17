@@ -14,12 +14,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Show onboarding on first launch
         OnboardingWindowController.shared.showIfNeeded()
 
-        // Initialize safety manager and wire up panic key
-        SafetyManager.shared.onPanicKeyPressed = { [weak self] in
-            OverlayWindowService.shared.dismissAll()
-            self?.menuBarController.iconState = .idle
-        }
-
         // Initialize settings window controller (listens for openSettings notification)
         _ = SettingsWindowController.shared
 

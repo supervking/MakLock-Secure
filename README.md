@@ -2,160 +2,74 @@
   <img src="Resources/icon.png" width="128" height="128" alt="MakLock icon">
 </p>
 
-<h1 align="center">MakLock</h1>
+<h1 align="center">MakLock Secure</h1>
 
 <p align="center">
-  <strong>Lock any macOS app with Touch ID, Apple Watch, or password.</strong><br>
-  Free, open source, and more powerful than paid alternatives.
+  A bilingual macOS application locker with persistent authentication overlays.
+</p>
+
+<p align="center">
+  <a href="README.zh-CN.md">简体中文</a> · English
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2013%2B-black?style=flat-square" alt="Platform">
-  <img src="https://img.shields.io/badge/swift-5.9%2B-FFD213?style=flat-square" alt="Swift">
+  <img src="https://img.shields.io/badge/Swift-5.9%2B-F05138?style=flat-square" alt="Swift">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-white?style=flat-square" alt="License"></a>
-  <a href="https://github.com/dutkiewiczmaciej/MakLock/stargazers"><img src="https://img.shields.io/github/stars/dutkiewiczmaciej/MakLock?style=flat-square&color=FFD213" alt="Stars"></a>
-  <a href="https://github.com/dutkiewiczmaciej/MakLock/releases/latest"><img src="https://img.shields.io/github/v/release/dutkiewiczmaciej/MakLock?style=flat-square&label=release" alt="Release"></a>
-  <a href="https://github.com/dutkiewiczmaciej/MakLock/releases"><img src="https://img.shields.io/github/downloads/dutkiewiczmaciej/MakLock/total?style=flat-square&color=34C759&label=downloads&v=2" alt="Downloads"></a>
+  <a href="https://github.com/supervking/MakLock-Secure/releases/latest"><img src="https://img.shields.io/github/v/release/supervking/MakLock-Secure?style=flat-square&label=release" alt="Release"></a>
+  <a href="https://github.com/supervking/MakLock-Secure/releases"><img src="https://img.shields.io/github/downloads/supervking/MakLock-Secure/total?style=flat-square&color=34C759&label=downloads" alt="Downloads"></a>
 </p>
 
----
+## Download
 
-## What is MakLock?
+Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
 
-MakLock is a lightweight menu bar app that protects your macOS applications with Touch ID, Apple Watch proximity, or a backup password. When someone tries to open or switch to a protected app, MakLock blocks access with a blur overlay and requires authentication.
+`MakLock-1.1.1-macos-universal.zip` supports macOS 13 or later on Apple Silicon and Intel Macs. Unzip it, drag `MakLock.app` to `/Applications`, then open it.
 
-Unlike App Store alternatives, MakLock is distributed directly — giving it full overlay and process management capabilities that sandboxed apps simply cannot offer.
+> The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
 
-## Why MakLock?
+## What is MakLock Secure?
 
-| Feature | MakLock | AppLocker ($17.99) | Cisdem AppCrypt ($19.99/yr) |
-|---------|:-------:|:------------------:|:---------------------------:|
-| **Price** | **Free forever** | 1 app free, paid for more | Trial only |
-| **Open source** | **Yes** | No | No |
-| **Touch ID** | **Yes** | Paid only | No |
-| **Lock on app switch** | **Yes** | No (launch only) | Yes (direct version) |
-| **Apple Watch unlock** | **Yes** (wrist detection) | No | No |
-| **Full-screen overlay** | **Yes** (blur, all monitors) | Yes (solid, single monitor) | Dialog box |
-| **No content flash** | **Yes** (NSPanel) | No (brief flash on launch) | N/A |
-| **Auto-close apps** | **Yes** | No (sandbox) | Yes (direct version) |
-| **Close apps on sleep** | **Yes** | No | No |
-| **Auto-lock on idle** | **Yes** | No | Yes |
-| **Auto-lock on sleep** | **Yes** | No | No |
-| **Panic key** | **Yes** | No | No |
-| **Multi-monitor** | **Yes** | Unknown | No |
-| **Bypass resistant** | **Yes** | No (Bundle ID edit) | Unknown |
-| **Can't be deleted without auth** | N/A | No (sandbox) | Yes (direct version) |
+MakLock Secure is an independent maintenance release of [MakLock](https://github.com/dutkiewiczmaciej/MakLock). It protects selected macOS applications with Touch ID, Apple Watch proximity, or a backup password. When a protected application is activated, MakLock displays an overlay until authentication succeeds.
 
-AppLocker (App Store) is sandboxed — it can only intercept app launches, not activations. If an app is already running, switching back shows content without authentication. Its overlay can also freeze the entire Mac, requiring a hard reboot. MakLock uses a non-activating NSPanel overlay that never steals focus, preventing these issues.
+## Security changes in 1.1.1
+
+- The lock overlay no longer dismisses itself after an inactivity timer.
+- Release builds contain no global keyboard shortcut that dismisses a lock overlay.
+- Automatic in-app updating is disabled so a verified build is not silently replaced.
+- The application interface is available in English and Simplified Chinese.
 
 ## Features
 
-- [x] Lock apps with Touch ID (single prompt)
-- [x] Password fallback for Macs without Touch ID
-- [x] Apple Watch proximity unlock with wrist detection
-- [x] Full-screen blur overlay on all monitors
-- [x] Auto-lock after idle timeout (configurable)
-- [x] Auto-lock on sleep/wake
-- [x] Auto-close inactive apps (prevents notification snooping)
-- [x] Close protected apps on sleep (privacy on shared laptops)
-- [x] Menu bar app (no Dock icon, runs silently)
-- [x] Panic key emergency exit (`Cmd+Opt+Shift+Ctrl+U`)
-- [x] System app blacklist (Terminal, Xcode, etc. can never be locked)
-- [x] Multi-monitor support
-- [x] First launch onboarding
-- [x] Settings with tabbed UI
-- [x] Automatic updates via Sparkle 2
-- [ ] Trusted Wi-Fi auto-unlock *(coming in v1.1)*
-- [ ] Per-window overlay *(coming in v1.2)*
-
-## Screenshots
-
-<p align="center">
-  <img src="Resources/screenshots/overlay.png" width="720" alt="Lock overlay">
-  <br><em>Full-screen blur overlay with Touch ID unlock</em>
-</p>
-
-<p align="center">
-  <img src="Resources/screenshots/settings.png" width="560" alt="Settings window">
-  <br><em>Settings with protected apps management</em>
-</p>
-
-<p align="center">
-  <img src="Resources/screenshots/menubar.png" width="280" alt="Menu bar">
-  <br><em>Menu bar with quick toggle and status</em>
-</p>
+- Touch ID authentication with backup-password fallback
+- Optional Apple Watch proximity unlock
+- Full-screen overlays across multiple displays
+- Locking after an idle timeout or Mac sleep
+- Optional auto-close for selected protected applications
+- First-launch onboarding and menu-bar settings
+- English and Simplified Chinese interface
 
 ## Installation
 
-### Download
+1. Download the latest ZIP from [Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
+2. Compare the ZIP with its published `.sha256` file.
+3. Move `MakLock.app` to `/Applications`.
+4. Open MakLock and set a backup password before adding protected applications.
 
-**[Download MakLock 1.0.0](https://github.com/dutkiewiczmaciej/MakLock/releases/latest)** — open the DMG and drag to Applications.
-
-> Signed with Developer ID and notarized by Apple. No Gatekeeper warnings — just download and run.
-
-### Homebrew
-
-```bash
-brew tap dutkiewiczmaciej/tap
-brew install --cask maklock
-```
-
-### Build from Source
+## Build from source
 
 ```bash
-git clone https://github.com/dutkiewiczmaciej/MakLock.git
-cd MakLock
-open MakLock.xcodeproj
+git clone https://github.com/supervking/MakLock-Secure.git
+cd MakLock-Secure
+xcodebuild -project MakLock.xcodeproj -scheme MakLock -configuration Release CODE_SIGNING_ALLOWED=NO build
 ```
 
-Build and run with `Cmd+R`. Requires Xcode 15+ and macOS 13+.
+Requires Xcode 15 or later and macOS 13 or later.
 
-## How It Works
+## Security boundaries
 
-1. **App Monitor** — watches for protected app launches and activations via NSWorkspace
-2. **Lock Overlay** — instantly shows a full-screen blur overlay on all displays
-3. **Authentication** — prompts Touch ID, checks Apple Watch proximity, or asks for password
-4. **Re-lock on quit** — Cmd+Q clears authentication, so the next launch requires re-auth (even for apps that stay alive in background like Messages)
-5. **Auto-lock** — re-locks on idle timeout, sleep, or when Apple Watch leaves range
-6. **Auto-close** — optionally terminates inactive protected apps to prevent notification snooping
+MakLock protects application access within an active macOS account. It is not a replacement for a separate macOS user account, FileVault, or the macOS lock screen. Keep your backup password private and lock your Mac when leaving it unattended.
 
-## Architecture
+## Attribution and license
 
-MakLock is a native Swift/SwiftUI application distributed outside the App Store for full system access.
-
-```
-MakLock/
-  App/        Entry point, AppDelegate
-  Core/       Services (AppMonitor, Auth, Watch, Overlay, Idle, Sleep, Inactivity)
-  UI/         Design system, Components, Settings, Lock Overlay
-  Models/     Data models (ProtectedApp, AppSettings, LockSession)
-  Resources/  Assets, Info.plist, Entitlements
-```
-
-**Key frameworks:** SwiftUI, AppKit, LocalAuthentication, CoreBluetooth, IOKit, ServiceManagement, HotKey (SPM), Sparkle 2 (SPM)
-
-## Safety
-
-MakLock includes multiple safety mechanisms to ensure you never get locked out:
-
-- **Panic key** — `Cmd+Option+Shift+Control+U` instantly dismisses all overlays
-- **System blacklist** — Terminal, Xcode, Activity Monitor, and other critical apps can never be locked
-- **Timeout failsafe** — overlays auto-dismiss after 60 seconds without interaction
-- **Dev mode** — DEBUG builds include a Skip button and 10-second auto-dismiss
-
-## Requirements
-
-- macOS 13.0 (Ventura) or later
-- Apple Silicon or Intel Mac
-- Touch ID recommended (password fallback available)
-- Apple Watch with watchOS 9+ for proximity unlock (optional)
-
-## Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-If you find MakLock useful, consider giving it a [star on GitHub](https://github.com/dutkiewiczmaciej/MakLock) — it helps others discover the project.
-
-## License
-
-[MIT](LICENSE) — Made by [MakMak](https://github.com/dutkiewiczmaciej)
+This independent maintenance release is based on the original [MakLock project](https://github.com/dutkiewiczmaciej/MakLock) by Maciej Dutkiewicz. The original copyright notice and the [MIT License](LICENSE) are retained.

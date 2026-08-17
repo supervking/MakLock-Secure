@@ -68,7 +68,7 @@ final class OverlayWindowService {
         NSLog("[MakLock] Overlay dismissed")
     }
 
-    /// Dismiss all overlays (used by panic key).
+    /// Dismiss all overlays when protection is intentionally disabled or an app is closed.
     func dismissAll() {
         hide()
     }

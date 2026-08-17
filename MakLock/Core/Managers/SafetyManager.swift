@@ -1,18 +1,9 @@
-import Foundation
-import HotKey
-import AppKit
-
-/// Manages safety mechanisms to prevent the user from getting locked out.
+/// Defines applications that must never be protected by MakLock.
 ///
-/// Safety features:
-/// - Panic key (Cmd+Option+Shift+Control+U) dismisses all overlays instantly
-/// - System blacklist prevents locking Terminal, Xcode, and other dev tools
-/// - Touch ID and the backup password provide recovery without time-based bypasses
+/// Protected applications can only be unlocked through the configured
+/// authentication mechanism; release builds do not register a bypass shortcut.
 final class SafetyManager {
     static let shared = SafetyManager()
-
-    /// Callback invoked when the panic key is pressed.
-    var onPanicKeyPressed: (() -> Void)?
 
     /// Bundle identifiers that can never be locked.
     static let systemBlacklist: Set<String> = [
@@ -35,33 +26,6 @@ final class SafetyManager {
         // MakLock itself
         "com.makmak.MakLock",
     ]
-
-    private var panicHotKey: HotKey?
-
-    private init() {
-        setupPanicKey()
-    }
-
-    // MARK: - Panic Key
-
-    private func setupPanicKey() {
-        // Cmd + Option + Shift + Control + U
-        panicHotKey = HotKey(
-            key: .u,
-            modifiers: [.command, .option, .shift, .control]
-        )
-
-        panicHotKey?.keyDownHandler = { [weak self] in
-            self?.triggerPanic()
-        }
-    }
-
-    private func triggerPanic() {
-        NSLog("[MakLock Safety] Panic key activated — dismissing all overlays")
-        onPanicKeyPressed?()
-    }
-
-    // MARK: - Blacklist
 
     /// Check whether an app is on the system blacklist and must never be locked.
     static func isBlacklisted(_ bundleIdentifier: String) -> Bool {
