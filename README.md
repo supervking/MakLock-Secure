@@ -24,7 +24,7 @@
 
 Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
 
-`MakLock-1.1.1-macos-universal.zip` supports macOS 13 or later on Apple Silicon and Intel Macs. Unzip it, drag `MakLock.app` to `/Applications`, then open it.
+`MakLock-1.1.1-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
 
 > The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
 
@@ -51,9 +51,9 @@ MakLock Secure is an independent maintenance release of [MakLock](https://github
 
 ## Installation
 
-1. Download the latest ZIP from [Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
-2. Compare the ZIP with its published `.sha256` file.
-3. Move `MakLock.app` to `/Applications`.
+1. Download the latest DMG from [Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
+2. Compare the DMG with its published `.sha256` file.
+3. Open the DMG and drag `MakLock.app` to `Applications`.
 4. Open MakLock and set a backup password before adding protected applications.
 
 ## Build from source
