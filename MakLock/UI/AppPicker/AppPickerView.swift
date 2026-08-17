@@ -57,7 +57,10 @@ struct AppPickerView: View {
 
             // Footer
             HStack {
-                Text("\(selectedBundleIDs.count) selected")
+                Text(String.localizedStringWithFormat(
+                    NSLocalizedString("%lld selected", comment: "Selected application count"),
+                    Int64(selectedBundleIDs.count)
+                ))
                     .font(MakLockTypography.caption)
                     .foregroundColor(.secondary)
                 Spacer()

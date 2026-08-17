@@ -41,7 +41,10 @@ struct GeneralSettingsView: View {
                             in: 1...30,
                             step: 1
                         )
-                        Text("\(settings.idleTimeoutMinutes) min")
+                        Text(String.localizedStringWithFormat(
+                            NSLocalizedString("%lld min", comment: "Idle timeout in minutes"),
+                            Int64(settings.idleTimeoutMinutes)
+                        ))
                             .frame(width: 50, alignment: .trailing)
                             .monospacedDigit()
                     }
@@ -65,7 +68,10 @@ struct GeneralSettingsView: View {
                         in: 1...60,
                         step: 1
                     )
-                    Text("\(settings.inactiveCloseMinutes) min")
+                    Text(String.localizedStringWithFormat(
+                        NSLocalizedString("%lld min", comment: "Auto-close timeout in minutes"),
+                        Int64(settings.inactiveCloseMinutes)
+                    ))
                         .frame(width: 50, alignment: .trailing)
                         .monospacedDigit()
                 }
@@ -76,14 +82,18 @@ struct GeneralSettingsView: View {
             }
 
             Section {
-                Button("Check for Updates…") {
-                    UpdateService.shared.updater.checkForUpdates()
-                }
+                Text("Automatic in-app updates are disabled to preserve verified security fixes.")
+                    .font(MakLockTypography.caption)
+                    .foregroundColor(MakLockColors.textSecondary)
 
                 HStack(spacing: 8) {
-                    Text("MakLock \(version) (\(build))  ·  Made by MakMak")
+                    Text(String.localizedStringWithFormat(
+                        NSLocalizedString("MakLock %@ (%@)  ·  Made by MakMak", comment: "Application version and attribution"),
+                        version,
+                        build
+                    ))
                         .foregroundColor(MakLockColors.textSecondary)
-                    Link(destination: URL(string: "https://github.com/dutkiewiczmaciej/MakLock")!) {
+                    Link(destination: URL(string: "https://github.com/supervking/MakLock-Secure")!) {
                         HStack(spacing: 3) {
                             Image(systemName: "arrow.up.right.square")
                             Text("GitHub")

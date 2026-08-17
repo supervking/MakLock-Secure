@@ -121,17 +121,17 @@ struct SecuritySettingsView: View {
 
     private func savePassword() {
         guard !newPassword.isEmpty else {
-            passwordError = "Password cannot be empty."
+            passwordError = String(localized: "Password cannot be empty.")
             return
         }
 
         guard newPassword.count >= 4 else {
-            passwordError = "Password must be at least 4 characters."
+            passwordError = String(localized: "Password must be at least 4 characters.")
             return
         }
 
         guard newPassword == confirmPassword else {
-            passwordError = "Passwords do not match."
+            passwordError = String(localized: "Passwords do not match.")
             return
         }
 
@@ -141,7 +141,7 @@ struct SecuritySettingsView: View {
             hasBackupPassword = true
             showPasswordSheet = false
         } else {
-            passwordError = "Failed to save password. Please try again."
+            passwordError = String(localized: "Failed to save password. Please try again.")
         }
     }
 

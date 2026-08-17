@@ -8,9 +8,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         menuBarController.setup()
 
-        // Initialize Sparkle auto-updater
-        UpdateService.shared.start()
-
         // Request notification permission (for Watch unlock notifications)
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
 
@@ -174,12 +171,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Post a local notification when Watch auto-unlocks an app.
     static func sendWatchUnlockNotification(appName: String) {
-        sendNotification(title: "Unlocked", body: "Apple Watch unlocked \(appName)")
+        sendNotification(
+            title: String(localized: "Unlocked"),
+            body: String(localized: "Apple Watch unlocked \(appName)")
+        )
     }
 
     /// Post a local notification when Touch ID or password unlocks an app.
     static func sendUnlockNotification(appName: String) {
-        sendNotification(title: "Unlocked", body: "\(appName) unlocked with Touch ID")
+        sendNotification(
+            title: String(localized: "Unlocked"),
+            body: String(localized: "\(appName) unlocked with Touch ID")
+        )
     }
 
     private static func sendNotification(title: String, body: String) {

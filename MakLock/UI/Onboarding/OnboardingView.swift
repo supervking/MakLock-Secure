@@ -161,9 +161,9 @@ private struct PanicKeyStep: View {
 /// A visual keyboard key cap.
 private struct KeyCap: View {
     let symbol: String
-    let label: String?
+    let label: LocalizedStringKey?
 
-    init(_ symbol: String, label: String?) {
+    init(_ symbol: String, label: LocalizedStringKey?) {
         self.symbol = symbol
         self.label = label
     }
@@ -180,9 +180,15 @@ private struct KeyCap: View {
                         .shadow(color: .black.opacity(0.4), radius: 1, y: 2)
                 )
 
-            Text(label ?? " ")
-                .font(.system(size: 8))
-                .foregroundColor(label != nil ? MakLockColors.textSecondary : .clear)
+            if let label {
+                Text(label)
+                    .font(.system(size: 8))
+                    .foregroundColor(MakLockColors.textSecondary)
+            } else {
+                Text(" ")
+                    .font(.system(size: 8))
+                    .foregroundColor(.clear)
+            }
         }
     }
 }
@@ -265,7 +271,7 @@ private struct PasswordSetupStep: View {
     }
 
     @ViewBuilder
-    private func passwordField(_ placeholder: String, text: Binding<String>) -> some View {
+    private func passwordField(_ placeholder: LocalizedStringKey, text: Binding<String>) -> some View {
         Group {
             if showPassword {
                 TextField(placeholder, text: text)
@@ -279,15 +285,15 @@ private struct PasswordSetupStep: View {
 
     private func savePassword() {
         guard !password.isEmpty else {
-            errorMessage = "Password cannot be empty."
+            errorMessage = String(localized: "Password cannot be empty.")
             return
         }
         guard password.count >= 4 else {
-            errorMessage = "Password must be at least 4 characters."
+            errorMessage = String(localized: "Password must be at least 4 characters.")
             return
         }
         guard password == confirmPassword else {
-            errorMessage = "Passwords do not match."
+            errorMessage = String(localized: "Passwords do not match.")
             return
         }
 
@@ -298,7 +304,7 @@ private struct PasswordSetupStep: View {
                 isSaved = true
             }
         } else {
-            errorMessage = "Failed to save. Please try again."
+            errorMessage = String(localized: "Failed to save. Please try again.")
         }
     }
 }
@@ -368,6 +374,6 @@ private struct FinalStep: View {
 
 private struct OnboardingInfoStep {
     let icon: String
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
 }

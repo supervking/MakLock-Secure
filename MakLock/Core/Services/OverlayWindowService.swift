@@ -1,12 +1,15 @@
 import AppKit
 import SwiftUI
 
-/// Manages overlay window lifecycle: show, hide, and timeout failsafe.
+/// Manages overlay window lifecycle for protected applications.
+///
+/// An overlay must remain visible until a trusted unlock path succeeds. In
+/// particular, it must never disappear merely because time has elapsed: doing
+/// so would expose the protected application without authentication.
 final class OverlayWindowService {
     static let shared = OverlayWindowService()
 
     private var overlayWindows: [LockOverlayWindow] = []
-    private var timeoutTimer: Timer?
     private var currentApp: ProtectedApp?
 
     /// Callback when overlay is dismissed after successful authentication.
@@ -35,15 +38,12 @@ final class OverlayWindowService {
         // with the system Touch ID dialog.
 
         createOverlayWindows(for: app)
-        startTimeoutTimer()
 
         NSLog("[MakLock] Overlay shown for: %@", app.name)
     }
 
-    /// Hide all overlay windows.
+    /// Hide all overlay windows after a trusted unlock action succeeds.
     func hide() {
-        stopTimeoutTimer()
-
         // Cancel any in-progress Touch ID evaluation
         AuthenticationService.shared.cancelAuthentication()
 
@@ -184,24 +184,6 @@ final class OverlayWindowService {
         }
         app.activate()
         NSLog("[MakLock] Activated app: %@", bundleIdentifier)
-    }
-
-    // MARK: - Timeout
-
-    private func startTimeoutTimer() {
-        let timeout = SafetyManager.isDevMode
-            ? SafetyManager.devModeTimeout
-            : SafetyManager.overlayTimeout
-
-        timeoutTimer = Timer.scheduledTimer(withTimeInterval: timeout, repeats: false) { [weak self] _ in
-            NSLog("[MakLock Safety] Overlay timeout reached (%.0fs) — auto-dismissing", timeout)
-            self?.hide()
-        }
-    }
-
-    private func stopTimeoutTimer() {
-        timeoutTimer?.invalidate()
-        timeoutTimer = nil
     }
 
 }

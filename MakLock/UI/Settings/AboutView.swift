@@ -17,7 +17,11 @@ struct AboutView: View {
                 .font(MakLockTypography.largeTitle)
 
             // Version
-            Text("Version \(version) (\(build))")
+            Text(String.localizedStringWithFormat(
+                NSLocalizedString("Version %@ (%@)", comment: "Application version and build"),
+                version,
+                build
+            ))
                 .font(MakLockTypography.caption)
                 .foregroundColor(.secondary)
 
@@ -40,11 +44,11 @@ struct AboutView: View {
             }
 
             // GitHub link
-            Link(destination: URL(string: "https://github.com/dutkiewiczmaciej/maklock")!) {
+            Link(destination: URL(string: "https://github.com/supervking/MakLock-Secure")!) {
                 HStack(spacing: 4) {
                     Image(systemName: "link")
                         .font(.system(size: 11))
-                    Text("github.com/dutkiewiczmaciej/maklock")
+                    Text("github.com/supervking/MakLock-Secure")
                         .font(MakLockTypography.caption)
                 }
             }

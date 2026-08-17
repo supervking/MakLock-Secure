@@ -50,8 +50,8 @@ final class UpdateService: NSObject, SPUStandardUserDriverDelegate {
 
     private func postUpdateNotification(version: String) {
         let content = UNMutableNotificationContent()
-        content.title = "MakLock Update Available"
-        content.body = "Version \(version) is ready to install."
+        content.title = String(localized: "MakLock Update Available")
+        content.body = String(localized: "Version \(version) is ready to install.")
         content.sound = nil
 
         let request = UNNotificationRequest(

@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 /// SwiftUI content for the menu bar popover dropdown.
@@ -51,7 +52,13 @@ struct MenuBarView: View {
                 Image(systemName: "app.badge.checkmark")
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
-                Text("\(appCount) protected app\(appCount == 1 ? "" : "s")")
+                Text(String.localizedStringWithFormat(
+                    NSLocalizedString(
+                        appCount == 1 ? "%lld protected app" : "%lld protected apps",
+                        comment: "Protected application count"
+                    ),
+                    Int64(appCount)
+                ))
                     .font(MakLockTypography.caption)
                     .foregroundColor(.secondary)
             }
@@ -90,7 +97,7 @@ struct MenuBarView: View {
             backing: .buffered,
             defer: false
         )
-        window.title = "About MakLock"
+        window.title = String(localized: "About MakLock")
         window.contentView = NSHostingView(rootView: AboutView())
         window.isReleasedWhenClosed = true
         window.center()
@@ -102,7 +109,7 @@ struct MenuBarView: View {
 // MARK: - Menu Bar Button
 
 private struct MenuBarButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String
     let action: () -> Void
 

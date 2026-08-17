@@ -2,11 +2,11 @@ import SwiftUI
 
 /// Gold accent button — used for primary actions (Unlock, Add, etc.)
 struct PrimaryButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String?
     let action: () -> Void
 
-    init(_ title: String, icon: String? = nil, action: @escaping () -> Void) {
+    init(_ title: LocalizedStringKey, icon: String? = nil, action: @escaping () -> Void) {
         self.title = title
         self.icon = icon
         self.action = action

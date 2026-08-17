@@ -7,28 +7,12 @@ import AppKit
 /// Safety features:
 /// - Panic key (Cmd+Option+Shift+Control+U) dismisses all overlays instantly
 /// - System blacklist prevents locking Terminal, Xcode, and other dev tools
-/// - Overlay timeout (60s) auto-dismisses stuck overlays
-/// - Dev mode (DEBUG only) adds Skip button and 10s auto-dismiss
+/// - Touch ID and the backup password provide recovery without time-based bypasses
 final class SafetyManager {
     static let shared = SafetyManager()
 
     /// Callback invoked when the panic key is pressed.
     var onPanicKeyPressed: (() -> Void)?
-
-    /// Whether dev mode safety features are active.
-    static var isDevMode: Bool {
-        #if DEBUG
-        return true
-        #else
-        return false
-        #endif
-    }
-
-    /// Maximum overlay display time before auto-dismiss (seconds).
-    static let overlayTimeout: TimeInterval = 60
-
-    /// Dev mode auto-dismiss time (seconds).
-    static let devModeTimeout: TimeInterval = 25
 
     /// Bundle identifiers that can never be locked.
     static let systemBlacklist: Set<String> = [
