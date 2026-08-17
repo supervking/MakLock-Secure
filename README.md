@@ -50,6 +50,19 @@ MakLock Secure is an independent maintenance release of [MakLock](https://github
 - English and Simplified Chinese interface
 - In-app language selection: Follow System, English, or Simplified Chinese
 
+## Free and commercial options
+
+MakLock Secure is free to download and its source is available under the MIT License. The table below is a pricing-and-scope snapshot reviewed on **2026-08-17**, not an independent security evaluation. Commercial pricing and features can change, and App Store prices vary by storefront.
+
+| | MakLock Secure | AppLocker | Cisdem AppCrypt for Mac |
+|---|---|---|---|
+| Price / access | Free download; MIT-licensed source | Free download with in-app purchases; the US App Store lists $2.99/month, $11.99/year, or $17.99 lifetime access | 3-day full-feature trial; the vendor's 1-Mac offer lists $19.99/year or $39.99 one-time purchase |
+| Published app-lock options | Touch ID, Apple Watch proximity, or backup password | Password, Touch ID, Bluetooth ID, or Network ID | Password-protected app locking, plus app allowlist mode |
+| Other published scope | Per-app overlay locking, idle/sleep locking, optional auto-close | Access history | Website blocking, schedules, and automatic re-locking |
+| Source availability | Yes — this repository | Not stated on the cited App Store listing | Not stated on the cited vendor pages |
+
+Sources: [AppLocker on the US App Store](https://apps.apple.com/us/app/applocker-passcode-lock-apps/id1132845904?platform=mac), [Cisdem AppCrypt features and trial](https://www.cisdem.com/appcrypt.html), and [Cisdem AppCrypt for Mac pricing](https://www.cisdem.com/appcrypt-mac/buy.html). Verify current terms and pricing with the vendor before purchasing.
+
 ## Installation
 
 1. Download the latest DMG from [Releases](https://github.com/supervking/MakLock-Secure/releases/latest).

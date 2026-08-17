@@ -50,6 +50,19 @@ MakLock Secure 是基于 [MakLock](https://github.com/dutkiewiczmaciej/MakLock) 
 - 英文、简体中文界面
 - 应用内语言选择：跟随系统、English 或简体中文
 
+## 免费与商业方案对比
+
+MakLock Secure 可免费下载，源码采用 MIT 许可证。下表是于 **2026-08-17** 核验的价格与公开功能范围快照，并非独立安全评测；商业软件的功能、价格和 App Store 各地区售价都可能变化。
+
+| | MakLock Secure | AppLocker | Cisdem AppCrypt for Mac |
+|---|---|---|---|
+| 价格／使用方式 | 免费下载；MIT 开源 | 免费下载，含 App 内购买；美国 App Store 显示为 $2.99／月、$11.99／年或 $17.99 终身版 | 3 天完整功能试用；厂商 1 台 Mac 报价为 $19.99／年或 $39.99 一次性购买 |
+| 已公开的应用加锁方式 | Touch ID、Apple Watch 接近解锁或备用密码 | 密码、Touch ID、Bluetooth ID 或 Network ID | 密码加锁，并提供应用允许列表模式 |
+| 已公开的其他范围 | 单应用锁定层、闲置／休眠后锁定、可选自动关闭 | 访问记录 | 网站拦截、计划任务和自动重新锁定 |
+| 源码可用性 | 是——本仓库 | 引用的 App Store 页面未说明 | 引用的厂商页面未说明 |
+
+资料来源：[AppLocker 美国 App Store 页面](https://apps.apple.com/us/app/applocker-passcode-lock-apps/id1132845904?platform=mac)、[Cisdem AppCrypt 功能与试用说明](https://www.cisdem.com/appcrypt.html) 与 [Cisdem AppCrypt for Mac 价格页](https://www.cisdem.com/appcrypt-mac/buy.html)。购买前请以厂商当期条款和售价为准。
+
 ## 安装步骤
 
 1. 从 [Releases](https://github.com/supervking/MakLock-Secure/releases/latest) 下载最新版 DMG。
