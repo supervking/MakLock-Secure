@@ -24,7 +24,7 @@
 
 Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
 
-`MakLock-1.1.2-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
+`MakLock-1.1.3-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
 
 > The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
 
@@ -49,6 +49,7 @@ MakLock Secure is an independent maintenance release of [MakLock](https://github
 - First-launch onboarding and menu-bar settings
 - English and Simplified Chinese interface
 - In-app language selection: Follow System, English, or Simplified Chinese
+- Password-first lock screen for remote and keyboard-only Macs; the password field is focused automatically and Return submits it
 
 ## Free and commercial options
 
@@ -71,6 +72,8 @@ Sources: [AppLocker on the US App Store](https://apps.apple.com/us/app/applocker
 4. Open MakLock and set a backup password before adding protected applications.
 
 To change the interface language, open **Settings → General → Language**, choose Follow System, English, or Simplified Chinese, then select **Restart MakLock**.
+
+For remote or keyboard-only Macs, **Settings → Security → Prefer password on lock screen** is enabled by default. The password field receives focus automatically; enter the password and press Return to unlock. Disable this setting if you prefer the original Touch ID-first flow.
 
 ## Build from source
 

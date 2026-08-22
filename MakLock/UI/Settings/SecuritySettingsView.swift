@@ -8,6 +8,7 @@ struct SecuritySettingsView: View {
     @State private var newPassword = ""
     @State private var confirmPassword = ""
     @State private var passwordError: String?
+    @State private var prefersPasswordUnlock = Defaults.shared.prefersPasswordUnlock
 
     var body: some View {
         Form {
@@ -40,6 +41,18 @@ struct SecuritySettingsView: View {
                         }
                     }
                 }
+            }
+
+            Section("Unlock Screen") {
+                Toggle("Prefer password on lock screen", isOn: $prefersPasswordUnlock)
+                    .toggleStyle(.goldSwitch)
+                    .onChange(of: prefersPasswordUnlock) { enabled in
+                        Defaults.shared.prefersPasswordUnlock = enabled
+                    }
+
+                Text("Show and focus the password field first. Press Return to unlock after entering the correct password.")
+                    .font(MakLockTypography.caption)
+                    .foregroundColor(.secondary)
             }
 
             Section("Backup Password") {

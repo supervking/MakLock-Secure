@@ -24,7 +24,7 @@
 
 请从 [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest) 下载当前版本。
 
-推荐下载 `MakLock-1.1.2-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
+推荐下载 `MakLock-1.1.3-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
 
 > 当前发布包使用 ad-hoc 本地签名，尚未经过 Apple 公证。首次打开时，macOS 可能要求你在“系统设置 → 隐私与安全性”中确认打开。请在打开前核对发布页提供的 SHA-256 校验文件。
 
@@ -49,6 +49,7 @@ MakLock Secure 是基于 [MakLock](https://github.com/dutkiewiczmaciej/MakLock) 
 - 首次启动引导与菜单栏设置
 - 英文、简体中文界面
 - 应用内语言选择：跟随系统、English 或简体中文
+- 密码优先的锁定界面：适合远程或纯键盘 Mac，密码框自动聚焦，按 Return 即可提交解锁
 
 ## 免费与商业方案对比
 
@@ -71,6 +72,8 @@ MakLock Secure 可免费下载，源码采用 MIT 许可证。下表是于 **202
 4. 打开 MakLock，先设置备用密码，再添加需要保护的应用。
 
 如需切换界面语言，请打开“设置 → 通用 → 语言”，选择“跟随系统”、“English”或“简体中文”，再点“重新启动 MakLock”。
+
+远程或纯键盘 Mac 默认启用“设置 → 安全性 → 锁定时优先使用密码”：锁定层会自动聚焦密码框，输入密码后按 Return 即可解锁。如偏好原来的 Touch ID 优先流程，可关闭此开关。
 
 ## 从源码构建
 

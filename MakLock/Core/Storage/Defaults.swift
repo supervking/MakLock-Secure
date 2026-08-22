@@ -13,6 +13,7 @@ final class Defaults {
         case appSettings
         case hasCompletedOnboarding
         case backupPasswordSet
+        case prefersPasswordUnlock
     }
 
     private init() {}
@@ -63,5 +64,18 @@ final class Defaults {
     var isBackupPasswordSet: Bool {
         get { defaults.bool(forKey: Key.backupPasswordSet.rawValue) }
         set { defaults.set(newValue, forKey: Key.backupPasswordSet.rawValue) }
+    }
+
+    /// Whether the lock overlay should start with a focused password field.
+    /// This is intentionally stored outside AppSettings so adding it does not
+    /// invalidate existing encoded AppSettings values from earlier releases.
+    var prefersPasswordUnlock: Bool {
+        get {
+            guard defaults.object(forKey: Key.prefersPasswordUnlock.rawValue) != nil else {
+                return true
+            }
+            return defaults.bool(forKey: Key.prefersPasswordUnlock.rawValue)
+        }
+        set { defaults.set(newValue, forKey: Key.prefersPasswordUnlock.rawValue) }
     }
 }
