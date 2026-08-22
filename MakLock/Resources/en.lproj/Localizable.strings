@@ -100,10 +100,12 @@
 "Try it now — it always works, even in full screen." = "Try it now — it always works, even in full screen.";
 "Turn on Bluetooth in System Settings to use Apple Watch unlock." = "Turn on Bluetooth in System Settings to use Apple Watch unlock.";
 "Unlock" = "Unlock";
+"Unlock Screen" = "Unlock Screen";
 "Unlock %@" = "Unlock %@";
 "Unlocked" = "Unlocked";
 "Use Apple Watch to unlock" = "Use Apple Watch to unlock";
 "Use Password Instead" = "Use Password Instead";
+"Use Touch ID Instead" = "Use Touch ID Instead";
 "Version %@ (%@)" = "Version %@ (%@)";
 "Version %@ is ready to install." = "Version %@ is ready to install.";
 "Watch" = "Watch";
@@ -126,3 +128,5 @@
 "Shift" = "Shift";
 "Skip (Dev)" = "Skip (Dev)";
 "Touch ID Not Available" = "Touch ID Not Available";
+"Prefer password on lock screen" = "Prefer password on lock screen";
+"Show and focus the password field first. Press Return to unlock after entering the correct password." = "Show and focus the password field first. Press Return to unlock after entering the correct password.";

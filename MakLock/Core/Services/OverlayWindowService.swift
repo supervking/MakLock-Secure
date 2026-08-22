@@ -101,8 +101,14 @@ final class OverlayWindowService {
         setTouchIDMode(false)
         for window in overlayWindows {
             window.allowKeyStatus = true
-            window.makeKeyAndOrderFront(nil)
+            window.orderFront(nil)
         }
+
+        let primaryScreen = NSScreen.main ?? NSScreen.screens.first
+        let primaryWindow = overlayWindows.first { window in
+            window.screen?.frame == primaryScreen?.frame
+        }
+        (primaryWindow ?? overlayWindows.first)?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 

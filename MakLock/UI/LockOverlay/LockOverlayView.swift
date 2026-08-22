@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The lock overlay UI: blur background with centered unlock card.
-/// Touch ID triggers automatically on appear — no user interaction needed for the happy path.
+/// The lock overlay UI: blur background with centered authentication card.
+/// Password-first is the default; Touch ID remains an optional fallback.
 struct LockOverlayView: View {
     let appName: String
     let bundleIdentifier: String
@@ -9,7 +9,7 @@ struct LockOverlayView: View {
     let onDismiss: () -> Void
 
     @State private var isVisible = false
-    @State private var showPasswordInput = false
+    @State private var showPasswordInput = Defaults.shared.prefersPasswordUnlock
     @State private var authState: AuthState = .authenticating
     @State private var errorMessage: String?
 
@@ -35,6 +35,12 @@ struct LockOverlayView: View {
                     },
                     onCancel: {
                         showPasswordInput = false
+                        authState = .waitingForUser
+                    },
+                    showsTouchIDFallback: isPrimary && AuthenticationService.shared.isTouchIDAvailable,
+                    onUseTouchID: {
+                        showPasswordInput = false
+                        attemptTouchID()
                     }
                 )
                 .transition(.opacity)
@@ -104,8 +110,14 @@ struct LockOverlayView: View {
             withAnimation(MakLockAnimations.overlayAppear) {
                 isVisible = true
             }
-            // Only the primary screen triggers Touch ID (prevents duplicate system prompts)
-            if isPrimary {
+            if Defaults.shared.prefersPasswordUnlock {
+                // Password-first is designed for remote and keyboard-only Macs.
+                // The primary overlay becomes key so PasswordInputView can focus its field.
+                if isPrimary {
+                    OverlayWindowService.shared.enableKeyboardInput()
+                }
+            } else if isPrimary {
+                // Only the primary screen triggers Touch ID (prevents duplicate system prompts).
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     attemptTouchID()
                 }

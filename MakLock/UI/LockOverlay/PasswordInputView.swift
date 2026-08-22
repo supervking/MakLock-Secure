@@ -5,9 +5,12 @@ struct PasswordInputView: View {
     @State private var password = ""
     @State private var errorMessage: String?
     @State private var shakeOffset: CGFloat = 0
+    @FocusState private var passwordFieldFocused: Bool
 
     let onSuccess: () -> Void
     let onCancel: () -> Void
+    let showsTouchIDFallback: Bool
+    let onUseTouchID: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -18,6 +21,8 @@ struct PasswordInputView: View {
             SecureField("Password", text: $password)
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 240)
+                .focused($passwordFieldFocused)
+                .submitLabel(.done)
                 .onSubmit { verifyPassword() }
                 .offset(x: shakeOffset)
 
@@ -36,6 +41,12 @@ struct PasswordInputView: View {
                     verifyPassword()
                 }
             }
+
+            if showsTouchIDFallback {
+                SecondaryButton("Use Touch ID Instead") {
+                    onUseTouchID()
+                }
+            }
         }
         .padding(32)
         .background(
@@ -43,6 +54,9 @@ struct PasswordInputView: View {
                 .fill(MakLockColors.cardDark)
                 .shadow(color: .black.opacity(0.3), radius: 20, y: 8)
         )
+        .onAppear {
+            focusPasswordField()
+        }
     }
 
     private func verifyPassword() {
@@ -55,6 +69,7 @@ struct PasswordInputView: View {
             errorMessage = error.localizedDescription
             password = ""
             triggerShake()
+            focusPasswordField()
         case .cancelled:
             break
         }
@@ -73,6 +88,12 @@ struct PasswordInputView: View {
             withAnimation(Animation.default.speed(4)) {
                 shakeOffset = 0
             }
+        }
+    }
+
+    private func focusPasswordField() {
+        DispatchQueue.main.async {
+            passwordFieldFocused = true
         }
     }
 }

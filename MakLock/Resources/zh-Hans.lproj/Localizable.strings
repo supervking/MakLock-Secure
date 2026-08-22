@@ -100,10 +100,12 @@
 "Try it now — it always works, even in full screen." = "现在试试——即使在全屏模式下也始终有效。";
 "Turn on Bluetooth in System Settings to use Apple Watch unlock." = "请在系统设置中打开蓝牙以使用 Apple Watch 解锁。";
 "Unlock" = "解锁";
+"Unlock Screen" = "解锁界面";
 "Unlock %@" = "解锁 %@";
 "Unlocked" = "已解锁";
 "Use Apple Watch to unlock" = "使用 Apple Watch 解锁";
 "Use Password Instead" = "改用密码";
+"Use Touch ID Instead" = "改用 Touch ID";
 "Version %@ (%@)" = "版本 %@（%@）";
 "Version %@ is ready to install." = "版本 %@ 已准备好安装。";
 "Watch" = "手表";
@@ -126,3 +128,5 @@
 "Shift" = "Shift";
 "Skip (Dev)" = "跳过（开发版）";
 "Touch ID Not Available" = "Touch ID 不可用";
+"Prefer password on lock screen" = "锁定时优先使用密码";
+"Show and focus the password field first. Press Return to unlock after entering the correct password." = "优先显示并聚焦密码框；输入正确密码后按 Return 即可解锁。";
