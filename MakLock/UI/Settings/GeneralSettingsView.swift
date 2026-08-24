@@ -41,14 +41,11 @@ struct GeneralSettingsView: View {
                                     }
                                 }
                             ),
-                            in: 1...30,
+                            in: 1...120,
                             step: 1
                         )
-                        Text(String.localizedStringWithFormat(
-                            NSLocalizedString("%lld min", comment: "Idle timeout in minutes"),
-                            Int64(settings.idleTimeoutMinutes)
-                        ))
-                            .frame(width: 50, alignment: .trailing)
+                        Text(formattedIdleTimeout(minutes: settings.idleTimeoutMinutes))
+                            .frame(width: 95, alignment: .trailing)
                             .monospacedDigit()
                     }
                 }
@@ -167,6 +164,31 @@ struct GeneralSettingsView: View {
         } catch {
             NSLog("[MakLock] Failed to update login item: %@", error.localizedDescription)
         }
+    }
+
+    private func formattedIdleTimeout(minutes: Int) -> String {
+        guard minutes >= 60 else {
+            return String.localizedStringWithFormat(
+                NSLocalizedString("%lld min", comment: "Idle timeout in minutes"),
+                Int64(minutes)
+            )
+        }
+
+        let hours = minutes / 60
+        let remainingMinutes = minutes % 60
+
+        guard remainingMinutes > 0 else {
+            return String.localizedStringWithFormat(
+                NSLocalizedString("%lld h", comment: "Idle timeout in whole hours"),
+                Int64(hours)
+            )
+        }
+
+        return String.localizedStringWithFormat(
+            NSLocalizedString("%lld h %lld min", comment: "Idle timeout in hours and minutes"),
+            Int64(hours),
+            Int64(remainingMinutes)
+        )
     }
 
     private func restartMakLock() {

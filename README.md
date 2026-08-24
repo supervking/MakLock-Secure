@@ -24,7 +24,7 @@
 
 Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
 
-`MakLock-1.1.3-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
+`MakLock-1.1.4-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
 
 > The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
 
@@ -44,7 +44,7 @@ MakLock Secure is an independent maintenance release of [MakLock](https://github
 - Touch ID authentication with backup-password fallback
 - Optional Apple Watch proximity unlock
 - Full-screen overlays across multiple displays
-- Locking after an idle timeout or Mac sleep
+- Locking after an idle timeout of up to 2 hours, or when the Mac sleeps
 - Optional auto-close for selected protected applications
 - First-launch onboarding and menu-bar settings
 - English and Simplified Chinese interface

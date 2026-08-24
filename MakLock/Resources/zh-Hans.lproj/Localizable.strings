@@ -116,6 +116,8 @@
 "%@ is Locked" = "%@ 已锁定";
 "%@ unlocked with Touch ID" = "%@ 已通过 Touch ID 解锁";
 "%lld min" = "%lld 分钟";
+"%lld h" = "%lld 小时";
+"%lld h %lld min" = "%lld 小时 %lld 分钟";
 "%lld protected app" = "%lld 个受保护应用";
 "%lld protected apps" = "%lld 个受保护应用";
 "%lld selected" = "已选择 %lld 项";
