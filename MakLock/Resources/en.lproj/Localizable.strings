@@ -116,6 +116,8 @@
 "%@ is Locked" = "%@ is Locked";
 "%@ unlocked with Touch ID" = "%@ unlocked with Touch ID";
 "%lld min" = "%lld min";
+"%lld h" = "%lld h";
+"%lld h %lld min" = "%lld h %lld min";
 "%lld protected app" = "%lld protected app";
 "%lld protected apps" = "%lld protected apps";
 "%lld selected" = "%lld selected";

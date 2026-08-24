@@ -24,7 +24,7 @@
 
 请从 [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest) 下载当前版本。
 
-推荐下载 `MakLock-1.1.3-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
+推荐下载 `MakLock-1.1.4-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
 
 > 当前发布包使用 ad-hoc 本地签名，尚未经过 Apple 公证。首次打开时，macOS 可能要求你在“系统设置 → 隐私与安全性”中确认打开。请在打开前核对发布页提供的 SHA-256 校验文件。
 
@@ -44,7 +44,7 @@ MakLock Secure 是基于 [MakLock](https://github.com/dutkiewiczmaciej/MakLock) 
 - Touch ID 认证，并提供备用密码
 - 可选 Apple Watch 接近解锁
 - 覆盖多显示器的全屏锁定层
-- 闲置超时或 Mac 休眠后重新锁定
+- 闲置超时（最长可设为 2 小时）或 Mac 休眠后重新锁定
 - 可为指定受保护应用启用自动关闭
 - 首次启动引导与菜单栏设置
 - 英文、简体中文界面
