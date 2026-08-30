@@ -24,7 +24,7 @@
 
 Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
 
-`MakLock-1.1.4-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
+`MakLock-1.1.5-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
 
 > The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
 
@@ -50,6 +50,7 @@ MakLock Secure is an independent maintenance release of [MakLock](https://github
 - English and Simplified Chinese interface
 - In-app language selection: Follow System, English, or Simplified Chinese
 - Password-first lock screen for remote and keyboard-only Macs; the password field is focused automatically and Return submits it
+- Password input recovers keyboard focus after long idle periods, remote-session focus changes, or another window taking focus
 
 ## Free and commercial options
 

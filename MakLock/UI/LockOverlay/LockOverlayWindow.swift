@@ -35,4 +35,13 @@ final class LockOverlayWindow: NSPanel {
 
     override var canBecomeKey: Bool { allowKeyStatus }
     override var canBecomeMain: Bool { false }
+
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .leftMouseDown, allowKeyStatus, !isKeyWindow {
+            NSApp.activate(ignoringOtherApps: true)
+            makeKey()
+        }
+
+        super.sendEvent(event)
+    }
 }
