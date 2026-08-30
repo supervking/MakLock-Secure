@@ -107,9 +107,12 @@ final class OverlayWindowService {
         let primaryScreen = NSScreen.main ?? NSScreen.screens.first
         let primaryWindow = overlayWindows.first { window in
             window.screen?.frame == primaryScreen?.frame
-        }
-        (primaryWindow ?? overlayWindows.first)?.makeKeyAndOrderFront(nil)
+        } ?? overlayWindows.first
+
         NSApp.activate(ignoringOtherApps: true)
+        DispatchQueue.main.async {
+            primaryWindow?.makeKeyAndOrderFront(nil)
+        }
     }
 
     // MARK: - Screen Management

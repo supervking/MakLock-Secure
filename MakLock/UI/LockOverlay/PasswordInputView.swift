@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// Password fallback input view shown in the lock overlay.
@@ -24,6 +25,11 @@ struct PasswordInputView: View {
                 .focused($passwordFieldFocused)
                 .submitLabel(.done)
                 .onSubmit { verifyPassword() }
+                .simultaneousGesture(
+                    TapGesture().onEnded {
+                        focusPasswordField()
+                    }
+                )
                 .offset(x: shakeOffset)
 
             if let errorMessage {
@@ -55,6 +61,9 @@ struct PasswordInputView: View {
                 .shadow(color: .black.opacity(0.3), radius: 20, y: 8)
         )
         .onAppear {
+            focusPasswordField()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             focusPasswordField()
         }
     }
@@ -92,6 +101,8 @@ struct PasswordInputView: View {
     }
 
     private func focusPasswordField() {
+        OverlayWindowService.shared.enableKeyboardInput()
+        passwordFieldFocused = false
         DispatchQueue.main.async {
             passwordFieldFocused = true
         }
