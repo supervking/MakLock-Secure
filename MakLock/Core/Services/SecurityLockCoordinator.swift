@@ -7,14 +7,26 @@ final class SecurityLockCoordinator {
 
     private init() {}
 
-    func lockProtectedApps(reason: SecurityLockReason) {
+    func lockProtectedApps(
+        reason: SecurityLockReason,
+        numericDetail: Int? = nil
+    ) {
         DispatchQueue.main.async { [weak self] in
             guard Defaults.shared.appSettings.isProtectionEnabled else { return }
 
             AppMonitorService.shared.clearAllAuthentications()
 
+            let target = self?.runningLockTarget()
+            SecurityEventStore.shared.record(
+                kind: reason.eventKind,
+                action: .locked,
+                succeeded: true,
+                affectedCount: target == nil ? 0 : 1,
+                numericDetail: numericDetail
+            )
+
             guard !OverlayWindowService.shared.isShowing,
-                  let target = self?.runningLockTarget() else {
+                  let target else {
                 return
             }
 

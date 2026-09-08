@@ -18,6 +18,10 @@ final class Defaults {
         case networkLossGraceSeconds
         case lockOnDisplayChange
         case trustedDisplayFingerprints
+        case quitProtectedAppsAfterRestart
+        case passwordBruteForceProtectionEnabled
+        case lastHandledBootIdentifier
+        case securityEventRecords
     }
 
     private init() {}
@@ -106,5 +110,34 @@ final class Defaults {
     var trustedDisplayFingerprints: [String] {
         get { defaults.stringArray(forKey: Key.trustedDisplayFingerprints.rawValue) ?? [] }
         set { defaults.set(newValue.sorted(), forKey: Key.trustedDisplayFingerprints.rawValue) }
+    }
+
+    var quitProtectedAppsAfterRestart: Bool {
+        get { defaults.bool(forKey: Key.quitProtectedAppsAfterRestart.rawValue) }
+        set { defaults.set(newValue, forKey: Key.quitProtectedAppsAfterRestart.rawValue) }
+    }
+
+    var passwordBruteForceProtectionEnabled: Bool {
+        get { defaults.bool(forKey: Key.passwordBruteForceProtectionEnabled.rawValue) }
+        set { defaults.set(newValue, forKey: Key.passwordBruteForceProtectionEnabled.rawValue) }
+    }
+
+    var lastHandledBootIdentifier: String? {
+        get { defaults.string(forKey: Key.lastHandledBootIdentifier.rawValue) }
+        set { defaults.set(newValue, forKey: Key.lastHandledBootIdentifier.rawValue) }
+    }
+
+    var securityEventRecords: [SecurityEventRecord] {
+        get {
+            guard let data = defaults.data(forKey: Key.securityEventRecords.rawValue),
+                  let records = try? decoder.decode([SecurityEventRecord].self, from: data) else {
+                return []
+            }
+            return records
+        }
+        set {
+            guard let data = try? encoder.encode(newValue) else { return }
+            defaults.set(data, forKey: Key.securityEventRecords.rawValue)
+        }
     }
 }

@@ -23,6 +23,20 @@ final class SafetyManager {
         "com.sublimetext.4",
         "com.jetbrains.intellij",
 
+        // Remote access tools must remain available so security automation
+        // cannot disconnect the owner from a headless Mac.
+        "com.carriez.rustdesk",
+        "com.splashtop.Splashtop-Streamer",
+        "com.splashtop.SplashtopStreamer",
+        "com.splashtop.streamer",
+        "com.splashtop.SplashtopPersonal",
+        "com.teamviewer.TeamViewer",
+        "com.anydesk.AnyDesk",
+        "com.microsoft.rdc.macos",
+        "com.apple.ScreenSharing",
+        "com.apple.RemoteDesktop",
+        "com.google.ChromeRemoteDesktopHost",
+
         // MakLock itself
         "com.makmak.MakLock",
     ]

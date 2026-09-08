@@ -34,11 +34,13 @@ struct LockOverlayView: View {
                         onDismiss()
                     },
                     onCancel: {
+                        OverlayWindowService.shared.disableKeyboardInput()
                         showPasswordInput = false
                         authState = .waitingForUser
                     },
                     showsTouchIDFallback: isPrimary && AuthenticationService.shared.isTouchIDAvailable,
                     onUseTouchID: {
+                        OverlayWindowService.shared.disableKeyboardInput()
                         showPasswordInput = false
                         attemptTouchID()
                     }

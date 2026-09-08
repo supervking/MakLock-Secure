@@ -36,6 +36,11 @@ final class LockOverlayWindow: NSPanel {
     override var canBecomeKey: Bool { allowKeyStatus }
     override var canBecomeMain: Bool { false }
 
+    func setPasswordInputMode(_ enabled: Bool) {
+        allowKeyStatus = enabled
+        becomesKeyOnlyIfNeeded = !enabled
+    }
+
     override func sendEvent(_ event: NSEvent) {
         if event.type == .leftMouseDown, allowKeyStatus, !isKeyWindow {
             NSApp.activate(ignoringOtherApps: true)
