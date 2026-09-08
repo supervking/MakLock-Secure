@@ -54,6 +54,10 @@
 		A10000000000000000000E01 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000E11 /* AboutView.swift */; };
 		A10000000000000000001001 /* SettingsAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001011 /* SettingsAuthService.swift */; };
 		A10000000000000000001101 /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001111 /* UpdateService.swift */; };
+		A10000000000000000001301 /* SecurityEventState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001311 /* SecurityEventState.swift */; };
+		A10000000000000000001302 /* SecurityLockCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001312 /* SecurityLockCoordinator.swift */; };
+		A10000000000000000001303 /* NetworkSecurityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001313 /* NetworkSecurityMonitor.swift */; };
+		A10000000000000000001304 /* DisplaySecurityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001314 /* DisplaySecurityMonitor.swift */; };
 		A10000000000000000001203 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000001202 /* Sparkle */; };
 /* End PBXBuildFile section */
 
@@ -106,6 +110,10 @@
 		A10000000000000000000E11 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		A10000000000000000001011 /* SettingsAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAuthService.swift; sourceTree = "<group>"; };
 		A10000000000000000001111 /* UpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateService.swift; sourceTree = "<group>"; };
+		A10000000000000000001311 /* SecurityEventState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityEventState.swift; sourceTree = "<group>"; };
+		A10000000000000000001312 /* SecurityLockCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityLockCoordinator.swift; sourceTree = "<group>"; };
+		A10000000000000000001313 /* NetworkSecurityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSecurityMonitor.swift; sourceTree = "<group>"; };
+		A10000000000000000001314 /* DisplaySecurityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaySecurityMonitor.swift; sourceTree = "<group>"; };
 		B10000000000000000000003 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B10000000000000000000004 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		B10000000000000000000006 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -195,6 +203,10 @@
 				4D8AAF1355AD0ACA8137F01D /* AppInactivityService.swift */,
 				A10000000000000000001011 /* SettingsAuthService.swift */,
 				A10000000000000000001111 /* UpdateService.swift */,
+				A10000000000000000001311 /* SecurityEventState.swift */,
+				A10000000000000000001312 /* SecurityLockCoordinator.swift */,
+				A10000000000000000001313 /* NetworkSecurityMonitor.swift */,
+				A10000000000000000001314 /* DisplaySecurityMonitor.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -459,6 +471,10 @@
 				3C36B23C6F719E84D10ECE91 /* AppInactivityService.swift in Sources */,
 				A10000000000000000001001 /* SettingsAuthService.swift in Sources */,
 				A10000000000000000001101 /* UpdateService.swift in Sources */,
+				A10000000000000000001301 /* SecurityEventState.swift in Sources */,
+				A10000000000000000001302 /* SecurityLockCoordinator.swift in Sources */,
+				A10000000000000000001303 /* NetworkSecurityMonitor.swift in Sources */,
+				A10000000000000000001304 /* DisplaySecurityMonitor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -589,7 +605,7 @@
 				CODE_SIGN_ENTITLEMENTS = MakLock/Resources/MakLock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MakLock/Resources/Info.plist;
@@ -599,7 +615,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.makmak.MakLock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = NO;
@@ -616,7 +632,7 @@
 				CODE_SIGN_ENTITLEMENTS = MakLock/Resources/MakLock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MakLock/Resources/Info.plist;
@@ -626,7 +642,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.makmak.MakLock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = YES;

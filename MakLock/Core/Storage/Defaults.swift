@@ -14,6 +14,10 @@ final class Defaults {
         case hasCompletedOnboarding
         case backupPasswordSet
         case prefersPasswordUnlock
+        case lockOnNetworkLoss
+        case networkLossGraceSeconds
+        case lockOnDisplayChange
+        case trustedDisplayFingerprints
     }
 
     private init() {}
@@ -77,5 +81,30 @@ final class Defaults {
             return defaults.bool(forKey: Key.prefersPasswordUnlock.rawValue)
         }
         set { defaults.set(newValue, forKey: Key.prefersPasswordUnlock.rawValue) }
+    }
+
+    var lockOnNetworkLoss: Bool {
+        get { defaults.bool(forKey: Key.lockOnNetworkLoss.rawValue) }
+        set { defaults.set(newValue, forKey: Key.lockOnNetworkLoss.rawValue) }
+    }
+
+    var networkLossGraceSeconds: Int {
+        get {
+            guard defaults.object(forKey: Key.networkLossGraceSeconds.rawValue) != nil else {
+                return 60
+            }
+            return min(300, max(60, defaults.integer(forKey: Key.networkLossGraceSeconds.rawValue)))
+        }
+        set { defaults.set(min(300, max(60, newValue)), forKey: Key.networkLossGraceSeconds.rawValue) }
+    }
+
+    var lockOnDisplayChange: Bool {
+        get { defaults.bool(forKey: Key.lockOnDisplayChange.rawValue) }
+        set { defaults.set(newValue, forKey: Key.lockOnDisplayChange.rawValue) }
+    }
+
+    var trustedDisplayFingerprints: [String] {
+        get { defaults.stringArray(forKey: Key.trustedDisplayFingerprints.rawValue) ?? [] }
+        set { defaults.set(newValue.sorted(), forKey: Key.trustedDisplayFingerprints.rawValue) }
     }
 }

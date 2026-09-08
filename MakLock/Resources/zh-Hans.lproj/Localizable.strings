@@ -84,6 +84,17 @@
 "Search apps..." = "搜索应用…";
 "Searching for Apple Watch..." = "正在搜索 Apple Watch…";
 "Security" = "安全性";
+"Security Events" = "安全事件";
+"Lock after internet connection is lost" = "断网后锁定受保护应用";
+"Network loss delay" = "断网宽限时间";
+"All connectivity probes must fail continuously before protected apps are locked. Reconnecting never unlocks them automatically." = "所有联网探测必须持续失败达到设定时间，才会锁定受保护应用；网络恢复后绝不会自动解锁。";
+"Lock when the trusted display setup changes" = "可信显示器配置变化时锁定";
+"Current displays: %@" = "当前显示器：%@";
+"%lld trusted display fingerprints" = "%lld 个可信显示器指纹";
+"Trust Current Display Setup" = "信任当前显示器配置";
+"Adding, removing, or replacing a display locks protected apps immediately. Resolution-only changes are ignored." = "新增、移除或替换显示器时会立即锁定受保护应用；仅分辨率变化不会触发。";
+"No Displays" = "没有显示器";
+"Unknown Display" = "未知显示器";
 "Select Applications" = "选择应用";
 "Sensitivity" = "灵敏度";
 "Set Backup Password" = "设置备用密码";
