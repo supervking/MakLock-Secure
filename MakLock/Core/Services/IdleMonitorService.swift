@@ -10,12 +10,14 @@ final class IdleMonitorService {
 
     private var timer: Timer?
     private let checkInterval: TimeInterval = 10
+    private var thresholdLatch = ThresholdTriggerLatch()
 
     private init() {}
 
     /// Start monitoring idle time with the given timeout in minutes.
     func startMonitoring() {
         stopMonitoring()
+        thresholdLatch.reset()
 
         timer = Timer.scheduledTimer(withTimeInterval: checkInterval, repeats: true) { [weak self] _ in
             self?.checkIdleTime()
@@ -28,6 +30,7 @@ final class IdleMonitorService {
     func stopMonitoring() {
         timer?.invalidate()
         timer = nil
+        thresholdLatch.reset()
     }
 
     /// Whether monitoring is active.
@@ -44,10 +47,12 @@ final class IdleMonitorService {
         let timeoutSeconds = TimeInterval(settings.idleTimeoutMinutes) * 60
         let idleSeconds = systemIdleTime()
 
-        if idleSeconds >= timeoutSeconds {
-            NSLog("[MakLock] Idle timeout reached (%.0fs idle, %.0fs threshold)", idleSeconds, timeoutSeconds)
-            onIdleTimeoutReached?()
+        guard thresholdLatch.observe(hasReachedThreshold: idleSeconds >= timeoutSeconds) else {
+            return
         }
+
+        NSLog("[MakLock] Idle timeout reached (%.0fs idle, %.0fs threshold)", idleSeconds, timeoutSeconds)
+        onIdleTimeoutReached?()
     }
 
     /// Get system idle time in seconds using IOKit HIDIdleTime.

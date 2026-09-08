@@ -17,6 +17,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Initialize settings window controller (listens for openSettings notification)
         _ = SettingsWindowController.shared
 
+        // Establish the current boot baseline before app monitoring begins.
+        // The first upgraded launch never performs cleanup; only a later real
+        // Mac restart can arm the protected-app cleanup window.
+        BootCleanupService.shared.start()
+
         // Wire up app monitor → overlay
         AppMonitorService.shared.onProtectedAppDetected = { [weak self] app in
             // Auto-unlock if Watch is in range AND unlocked (on wrist).
@@ -33,6 +38,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             OverlayWindowService.shared.show(for: app)
             self?.menuBarController.iconState = .locked
+            SecurityEventStore.shared.record(
+                kind: .protectedAppActivation,
+                action: .locked,
+                succeeded: true,
+                affectedCount: 1
+            )
         }
 
         SecurityLockCoordinator.shared.onLockRequired = { [weak self] app, _ in
@@ -41,11 +52,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         NetworkSecurityMonitor.shared.onNetworkLoss = {
-            SecurityLockCoordinator.shared.lockProtectedApps(reason: .networkLoss)
+            SecurityLockCoordinator.shared.lockProtectedApps(
+                reason: .networkLoss,
+                numericDetail: Defaults.shared.networkLossGraceSeconds
+            )
         }
 
         DisplaySecurityMonitor.shared.onUntrustedDisplayChange = {
-            SecurityLockCoordinator.shared.lockProtectedApps(reason: .displayChange)
+            SecurityLockCoordinator.shared.lockProtectedApps(
+                reason: .displayChange,
+                numericDetail: DisplaySecurityMonitor.currentDisplays().count
+            )
         }
 
         // Update icon when overlay is dismissed after successful auth
@@ -75,7 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Wire up idle monitor → lock/close all running protected apps
         IdleMonitorService.shared.onIdleTimeoutReached = { [weak self] in
-            self?.lockOrCloseProtectedApps()
+            self?.lockOrCloseProtectedApps(reason: .idleTimeout)
         }
 
         // Start idle monitoring if enabled
@@ -85,7 +102,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Wire up sleep → close autoClose apps, lock others if lockOnSleep enabled
         SleepWakeService.shared.onSleep = { [weak self] in
-            self?.lockOrCloseProtectedApps(showOverlays: Defaults.shared.appSettings.lockOnSleep)
+            self?.lockOrCloseProtectedApps(
+                reason: .sleep,
+                showOverlays: Defaults.shared.appSettings.lockOnSleep
+            )
         }
 
         // On wake, terminate any auto-close apps that survived sleep
@@ -96,6 +116,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Start sleep/wake observer
         SleepWakeService.shared.startObserving()
+        SessionFocusService.shared.startObserving()
 
         // Wire up Watch proximity → auto-unlock when Watch returns in range
         WatchProximityService.shared.onWatchInRange = { [weak self] in
@@ -112,7 +133,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Wire up Watch proximity → lock/close when Watch leaves range
         WatchProximityService.shared.onWatchOutOfRange = { [weak self] in
-            self?.lockOrCloseProtectedApps()
+            self?.lockOrCloseProtectedApps(reason: .watchOutOfRange)
         }
 
         NetworkSecurityMonitor.shared.reloadSettings()
@@ -124,7 +145,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Lock or close all running protected apps.
     /// Apps with autoClose → forceTerminate. Others → overlay (if showOverlays is true).
-    private func lockOrCloseProtectedApps(showOverlays: Bool = true) {
+    private func lockOrCloseProtectedApps(
+        reason: SecurityLockReason,
+        showOverlays: Bool = true
+    ) {
         AppMonitorService.shared.clearAllAuthentications()
         let runningBundleIDs = Set(NSWorkspace.shared.runningApplications.map(\.bundleIdentifier))
         let apps = ProtectedAppsManager.shared.apps.filter {
@@ -149,6 +173,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if showedOverlay {
             menuBarController.iconState = .locked
         }
+
+        SecurityEventStore.shared.record(
+            kind: reason.eventKind,
+            action: .locked,
+            succeeded: true,
+            affectedCount: apps.count
+        )
     }
 
     /// Terminate any running auto-close apps (safety net for wake from sleep).

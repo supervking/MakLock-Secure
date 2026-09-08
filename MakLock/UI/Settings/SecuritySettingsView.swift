@@ -14,6 +14,16 @@ struct SecuritySettingsView: View {
     @State private var lockOnDisplayChange = Defaults.shared.lockOnDisplayChange
     @State private var currentDisplays = DisplaySecurityMonitor.currentDisplays()
     @State private var trustedDisplayCount = Defaults.shared.trustedDisplayFingerprints.count
+    @State private var quitProtectedAppsAfterRestart = Defaults.shared.quitProtectedAppsAfterRestart
+    @State private var passwordBruteForceProtectionEnabled = Defaults.shared.passwordBruteForceProtectionEnabled
+    @State private var recentSecurityEvents: [SecurityEventRecord] = []
+
+    private static let eventDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .medium
+        return formatter
+    }()
 
     var body: some View {
         Form {
@@ -118,6 +128,57 @@ struct SecuritySettingsView: View {
                 }
             }
 
+            Section("Advanced Protection") {
+                Toggle("Quit protected apps after Mac restart", isOn: $quitProtectedAppsAfterRestart)
+                    .toggleStyle(.goldSwitch)
+                    .onChange(of: quitProtectedAppsAfterRestart) { enabled in
+                        Defaults.shared.quitProtectedAppsAfterRestart = enabled
+                    }
+
+                Text("After a real Mac restart, automatically restored protected apps are closed during a 90-second startup window. Remote access and system apps are never targeted.")
+                    .font(MakLockTypography.caption)
+                    .foregroundColor(.secondary)
+
+                Toggle("Block password guessing", isOn: $passwordBruteForceProtectionEnabled)
+                    .toggleStyle(.goldSwitch)
+                    .onChange(of: passwordBruteForceProtectionEnabled) { enabled in
+                        Defaults.shared.passwordBruteForceProtectionEnabled = enabled
+                    }
+
+                Text("Five wrong passwords within 30 minutes block password unlock for 3 hours. Touch ID and Apple Watch remain available.")
+                    .font(MakLockTypography.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Section("Recent Security Events — 12 Hours") {
+                if recentSecurityEvents.isEmpty {
+                    Text("No security events in the last 12 hours")
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(recentSecurityEvents) { event in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: event.succeeded ? "checkmark.shield.fill" : "exclamationmark.shield.fill")
+                                .foregroundColor(event.succeeded ? MakLockColors.success : MakLockColors.locked)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(eventTitle(event.kind))
+                                    .font(MakLockTypography.body)
+                                Text(eventSummary(event))
+                                    .font(MakLockTypography.caption)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Spacer()
+
+                            Text(Self.eventDateFormatter.string(from: event.timestamp))
+                                .font(MakLockTypography.caption)
+                                .foregroundColor(.secondary)
+                                .monospacedDigit()
+                        }
+                    }
+                }
+            }
+
             Section("Backup Password") {
                 if hasBackupPassword {
                     HStack {
@@ -155,6 +216,7 @@ struct SecuritySettingsView: View {
         .onAppear {
             hasBackupPassword = KeychainManager.shared.hasPassword()
             refreshDisplayStatus()
+            recentSecurityEvents = SecurityEventStore.shared.recentRecords()
         }
         .sheet(isPresented: $showPasswordSheet) {
             passwordSheet
@@ -250,5 +312,65 @@ struct SecuritySettingsView: View {
     private func refreshDisplayStatus() {
         currentDisplays = DisplaySecurityMonitor.currentDisplays()
         trustedDisplayCount = Defaults.shared.trustedDisplayFingerprints.count
+    }
+
+    private func eventTitle(_ kind: SecurityEventKind) -> LocalizedStringKey {
+        switch kind {
+        case .protectedAppActivation:
+            return "Protected app activated"
+        case .networkLoss:
+            return "Internet connection lost"
+        case .displayChange:
+            return "Display setup changed"
+        case .restartCleanup:
+            return "Restart cleanup"
+        case .idleTimeout:
+            return "Idle timeout"
+        case .sleep:
+            return "Mac sleep"
+        case .watchOutOfRange:
+            return "Apple Watch out of range"
+        case .passwordFailure:
+            return "Wrong password"
+        case .passwordLockout:
+            return "Password locked"
+        case .blockedPasswordAttempt:
+            return "Blocked password attempt"
+        case .sessionFocusRecovery:
+            return "Password focus restored"
+        }
+    }
+
+    private func eventSummary(_ event: SecurityEventRecord) -> String {
+        if let numericDetail = event.numericDetail {
+            return String.localizedStringWithFormat(
+                NSLocalizedString("Security action: %@ · value: %lld", comment: "Security event action and numeric detail"),
+                localizedAction(event.action),
+                Int64(numericDetail)
+            )
+        }
+
+        return String.localizedStringWithFormat(
+            NSLocalizedString("Security action: %@ · affected: %lld", comment: "Security event action and affected app count"),
+            localizedAction(event.action),
+            Int64(event.affectedCount)
+        )
+    }
+
+    private func localizedAction(_ action: SecurityEventAction) -> String {
+        switch action {
+        case .locked:
+            return String(localized: "Locked")
+        case .gracefulQuit:
+            return String(localized: "Quit")
+        case .forcedQuit:
+            return String(localized: "Force Quit")
+        case .retryDelayed:
+            return String(localized: "Retry delayed")
+        case .passwordBlocked:
+            return String(localized: "Password blocked")
+        case .focusRestored:
+            return String(localized: "Focus restored")
+        }
     }
 }

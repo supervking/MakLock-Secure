@@ -7,6 +7,7 @@ final class KeychainManager {
 
     private let service = "com.makmak.MakLock"
     private let account = "backup-password"
+    private let passwordAttemptStateAccount = "password-attempt-state"
 
     private init() {}
 
@@ -58,6 +59,70 @@ final class KeychainManager {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account
+        ]
+
+        let status = SecItemDelete(query as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
+    }
+
+    @discardableResult
+    func savePasswordAttemptState(_ state: PasswordAttemptState) -> Bool {
+        guard let data = try? JSONEncoder().encode(state) else { return false }
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: passwordAttemptStateAccount
+        ]
+
+        let updateAttributes: [String: Any] = [
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        ]
+        let updateStatus = SecItemUpdate(
+            query as CFDictionary,
+            updateAttributes as CFDictionary
+        )
+        if updateStatus == errSecSuccess {
+            return true
+        }
+        guard updateStatus == errSecItemNotFound else { return false }
+
+        let addQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: passwordAttemptStateAccount,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        ]
+
+        return SecItemAdd(addQuery as CFDictionary, nil) == errSecSuccess
+    }
+
+    func loadPasswordAttemptState() -> PasswordAttemptState? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: passwordAttemptStateAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(PasswordAttemptState.self, from: data)
+    }
+
+    @discardableResult
+    func deletePasswordAttemptState() -> Bool {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: passwordAttemptStateAccount
         ]
 
         let status = SecItemDelete(query as CFDictionary)

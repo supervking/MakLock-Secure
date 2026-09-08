@@ -11,6 +11,8 @@ final class OverlayWindowService {
 
     private var overlayWindows: [LockOverlayWindow] = []
     private var currentApp: ProtectedApp?
+    private var isPasswordInputEnabled = false
+    private var isTouchIDMode = false
 
     /// Callback when overlay is dismissed after successful authentication.
     /// Passes the name of the unlocked app.
@@ -54,6 +56,8 @@ final class OverlayWindowService {
 
         overlayWindows.forEach { $0.close() }
         overlayWindows.removeAll()
+        isPasswordInputEnabled = false
+        isTouchIDMode = false
 
         // Activate the protected app now that overlays are gone.
         // Small delay ensures overlay panels and Touch ID dialog are fully dismissed
@@ -91,6 +95,10 @@ final class OverlayWindowService {
     /// During Touch ID: pass through mouse events so system dialog gets interaction.
     /// After auth: restore mouse capture for overlay blocking.
     func setTouchIDMode(_ active: Bool) {
+        isTouchIDMode = active
+        if active {
+            isPasswordInputEnabled = false
+        }
         for window in overlayWindows {
             window.ignoresMouseEvents = active
         }
@@ -98,21 +106,67 @@ final class OverlayWindowService {
 
     /// Enable key window status on overlay windows (needed for password input).
     func enableKeyboardInput() {
+        isPasswordInputEnabled = true
+        isTouchIDMode = false
         setTouchIDMode(false)
         for window in overlayWindows {
-            window.allowKeyStatus = true
+            window.setPasswordInputMode(true)
             window.orderFront(nil)
         }
 
-        let primaryScreen = NSScreen.main ?? NSScreen.screens.first
-        let primaryWindow = overlayWindows.first { window in
-            window.screen?.frame == primaryScreen?.frame
-        } ?? overlayWindows.first
+        makePasswordWindowKeyAndRequestFocus()
+    }
+
+    func disableKeyboardInput() {
+        isPasswordInputEnabled = false
+        for window in overlayWindows {
+            window.setPasswordInputMode(false)
+        }
+    }
+
+    @discardableResult
+    func restorePasswordFocusAfterSessionActivation(
+        completion: @escaping (Bool) -> Void
+    ) -> Bool {
+        guard isShowing, isPasswordInputEnabled, !isTouchIDMode else {
+            return false
+        }
+
+        let delays = [0.0, 0.4, 1.2, 2.5, 4.0]
+        for (index, delay) in delays.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                guard let self, self.isShowing, self.isPasswordInputEnabled, !self.isTouchIDMode else {
+                    return
+                }
+                self.makePasswordWindowKeyAndRequestFocus()
+
+                if index == delays.count - 1 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                        completion(self?.primaryOverlayWindow()?.isKeyWindow == true)
+                    }
+                }
+            }
+        }
+        return true
+    }
+
+    private func makePasswordWindowKeyAndRequestFocus() {
+        guard isShowing, isPasswordInputEnabled, !isTouchIDMode else { return }
+
+        let primaryWindow = primaryOverlayWindow()
 
         NSApp.activate(ignoringOtherApps: true)
         DispatchQueue.main.async {
             primaryWindow?.makeKeyAndOrderFront(nil)
+            NotificationCenter.default.post(name: .makLockPasswordFocusRequested, object: nil)
         }
+    }
+
+    private func primaryOverlayWindow() -> LockOverlayWindow? {
+        let primaryScreen = NSScreen.main ?? NSScreen.screens.first
+        return overlayWindows.first { window in
+            window.screen?.frame == primaryScreen?.frame
+        } ?? overlayWindows.first
     }
 
     // MARK: - Screen Management
@@ -180,6 +234,10 @@ final class OverlayWindowService {
             window.orderFront(nil)
             overlayWindows.append(window)
         }
+
+        if Defaults.shared.prefersPasswordUnlock {
+            enableKeyboardInput()
+        }
     }
 
     // MARK: - App Window Management
@@ -195,4 +253,10 @@ final class OverlayWindowService {
         NSLog("[MakLock] Activated app: %@", bundleIdentifier)
     }
 
+}
+
+extension Notification.Name {
+    static let makLockPasswordFocusRequested = Notification.Name(
+        "com.makmak.MakLock.passwordFocusRequested"
+    )
 }

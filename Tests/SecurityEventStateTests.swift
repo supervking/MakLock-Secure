@@ -13,6 +13,7 @@ enum SecurityEventStateTests {
         duplicateTrustedFingerprintTriggersImmediately()
         secondUnknownDisplayChangeTriggersAgain()
         returningToTrustedDisplayResetsMismatch()
+        thresholdTriggersOnlyOnceUntilRecovery()
         print("Security event state tests passed")
     }
 
@@ -90,5 +91,14 @@ enum SecurityEventStateTests {
         precondition(tracker.observe(current: changed, trusted: trusted))
         precondition(!tracker.observe(current: trusted, trusted: trusted))
         precondition(tracker.observe(current: changed, trusted: trusted))
+    }
+
+    private static func thresholdTriggersOnlyOnceUntilRecovery() {
+        var latch = ThresholdTriggerLatch()
+        precondition(!latch.observe(hasReachedThreshold: false))
+        precondition(latch.observe(hasReachedThreshold: true))
+        precondition(!latch.observe(hasReachedThreshold: true))
+        precondition(!latch.observe(hasReachedThreshold: false))
+        precondition(latch.observe(hasReachedThreshold: true))
     }
 }

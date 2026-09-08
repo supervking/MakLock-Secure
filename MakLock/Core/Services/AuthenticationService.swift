@@ -63,10 +63,35 @@ final class AuthenticationService {
             return .failure(.noPasswordSet)
         }
 
+        if Defaults.shared.passwordBruteForceProtectionEnabled {
+            switch PasswordAttemptLimiter.shared.currentDecision() {
+            case .allowed:
+                break
+            case .delayed(let remainingSeconds):
+                PasswordAttemptLimiter.shared.recordBlockedAttempt(remainingSeconds: remainingSeconds)
+                return .failure(.passwordRetryAfter(remainingSeconds))
+            case .locked(let remainingSeconds):
+                PasswordAttemptLimiter.shared.recordBlockedAttempt(remainingSeconds: remainingSeconds)
+                return .failure(.passwordLocked(remainingSeconds))
+            }
+        }
+
         if KeychainManager.shared.verifyPassword(password) {
+            PasswordAttemptLimiter.shared.resetAfterSuccessfulPassword()
             return .success
-        } else {
+        }
+
+        guard Defaults.shared.passwordBruteForceProtectionEnabled else {
             return .failure(.wrongPassword)
+        }
+
+        switch PasswordAttemptLimiter.shared.recordFailure() {
+        case .allowed:
+            return .failure(.wrongPassword)
+        case .delayed(let remainingSeconds):
+            return .failure(.passwordRetryAfter(remainingSeconds))
+        case .locked(let remainingSeconds):
+            return .failure(.passwordLocked(remainingSeconds))
         }
     }
 

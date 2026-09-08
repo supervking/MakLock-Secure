@@ -3,6 +3,24 @@ import Foundation
 enum SecurityLockReason: String {
     case networkLoss
     case displayChange
+    case idleTimeout
+    case sleep
+    case watchOutOfRange
+
+    var eventKind: SecurityEventKind {
+        switch self {
+        case .networkLoss:
+            return .networkLoss
+        case .displayChange:
+            return .displayChange
+        case .idleTimeout:
+            return .idleTimeout
+        case .sleep:
+            return .sleep
+        case .watchOutOfRange:
+            return .watchOutOfRange
+        }
+    }
 }
 
 struct NetworkOutageTracker {
@@ -69,5 +87,24 @@ struct DisplayTrustTracker {
 
     mutating func reset() {
         lastTriggeredMismatch = nil
+    }
+}
+
+struct ThresholdTriggerLatch {
+    private(set) var hasTriggered = false
+
+    mutating func observe(hasReachedThreshold: Bool) -> Bool {
+        guard hasReachedThreshold else {
+            hasTriggered = false
+            return false
+        }
+
+        guard !hasTriggered else { return false }
+        hasTriggered = true
+        return true
+    }
+
+    mutating func reset() {
+        hasTriggered = false
     }
 }
