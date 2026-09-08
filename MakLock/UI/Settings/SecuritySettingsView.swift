@@ -9,6 +9,11 @@ struct SecuritySettingsView: View {
     @State private var confirmPassword = ""
     @State private var passwordError: String?
     @State private var prefersPasswordUnlock = Defaults.shared.prefersPasswordUnlock
+    @State private var lockOnNetworkLoss = Defaults.shared.lockOnNetworkLoss
+    @State private var networkLossGraceSeconds = Defaults.shared.networkLossGraceSeconds
+    @State private var lockOnDisplayChange = Defaults.shared.lockOnDisplayChange
+    @State private var currentDisplays = DisplaySecurityMonitor.currentDisplays()
+    @State private var trustedDisplayCount = Defaults.shared.trustedDisplayFingerprints.count
 
     var body: some View {
         Form {
@@ -55,6 +60,64 @@ struct SecuritySettingsView: View {
                     .foregroundColor(.secondary)
             }
 
+            Section("Security Events") {
+                Toggle("Lock after internet connection is lost", isOn: $lockOnNetworkLoss)
+                    .toggleStyle(.goldSwitch)
+                    .onChange(of: lockOnNetworkLoss) { enabled in
+                        Defaults.shared.lockOnNetworkLoss = enabled
+                        NetworkSecurityMonitor.shared.reloadSettings()
+                    }
+
+                if lockOnNetworkLoss {
+                    Picker("Network loss delay", selection: $networkLossGraceSeconds) {
+                        ForEach([60, 120, 300], id: \.self) { seconds in
+                            Text(networkDelayLabel(seconds: seconds))
+                                .tag(seconds)
+                        }
+                    }
+                    .onChange(of: networkLossGraceSeconds) { seconds in
+                        Defaults.shared.networkLossGraceSeconds = seconds
+                    }
+
+                    Text("All connectivity probes must fail continuously before protected apps are locked. Reconnecting never unlocks them automatically.")
+                        .font(MakLockTypography.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Toggle("Lock when the trusted display setup changes", isOn: $lockOnDisplayChange)
+                    .toggleStyle(.goldSwitch)
+                    .onChange(of: lockOnDisplayChange) { enabled in
+                        if enabled && Defaults.shared.trustedDisplayFingerprints.isEmpty {
+                            trustCurrentDisplays()
+                        }
+                        Defaults.shared.lockOnDisplayChange = enabled
+                        DisplaySecurityMonitor.shared.reloadSettings()
+                    }
+
+                if lockOnDisplayChange {
+                    Text(String.localizedStringWithFormat(
+                        NSLocalizedString("Current displays: %@", comment: "Current display names"),
+                        currentDisplaySummary
+                    ))
+                    .font(MakLockTypography.caption)
+
+                    Text(String.localizedStringWithFormat(
+                        NSLocalizedString("%lld trusted display fingerprints", comment: "Trusted display fingerprint count"),
+                        Int64(trustedDisplayCount)
+                    ))
+                    .font(MakLockTypography.caption)
+                    .foregroundColor(.secondary)
+
+                    Button("Trust Current Display Setup") {
+                        trustCurrentDisplays()
+                    }
+
+                    Text("Adding, removing, or replacing a display locks protected apps immediately. Resolution-only changes are ignored.")
+                        .font(MakLockTypography.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
             Section("Backup Password") {
                 if hasBackupPassword {
                     HStack {
@@ -91,6 +154,7 @@ struct SecuritySettingsView: View {
         .padding()
         .onAppear {
             hasBackupPassword = KeychainManager.shared.hasPassword()
+            refreshDisplayStatus()
         }
         .sheet(isPresented: $showPasswordSheet) {
             passwordSheet
@@ -162,5 +226,29 @@ struct SecuritySettingsView: View {
         newPassword = ""
         confirmPassword = ""
         passwordError = nil
+    }
+
+    private var currentDisplaySummary: String {
+        guard !currentDisplays.isEmpty else {
+            return String(localized: "No Displays")
+        }
+        return currentDisplays.map(\.name).joined(separator: ", ")
+    }
+
+    private func networkDelayLabel(seconds: Int) -> String {
+        String.localizedStringWithFormat(
+            NSLocalizedString("%lld min", comment: "Network loss delay in minutes"),
+            Int64(seconds / 60)
+        )
+    }
+
+    private func trustCurrentDisplays() {
+        DisplaySecurityMonitor.shared.trustCurrentDisplays()
+        refreshDisplayStatus()
+    }
+
+    private func refreshDisplayStatus() {
+        currentDisplays = DisplaySecurityMonitor.currentDisplays()
+        trustedDisplayCount = Defaults.shared.trustedDisplayFingerprints.count
     }
 }

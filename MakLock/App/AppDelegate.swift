@@ -35,6 +35,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.menuBarController.iconState = .locked
         }
 
+        SecurityLockCoordinator.shared.onLockRequired = { [weak self] app, _ in
+            OverlayWindowService.shared.show(for: app)
+            self?.menuBarController.iconState = .locked
+        }
+
+        NetworkSecurityMonitor.shared.onNetworkLoss = {
+            SecurityLockCoordinator.shared.lockProtectedApps(reason: .networkLoss)
+        }
+
+        DisplaySecurityMonitor.shared.onUntrustedDisplayChange = {
+            SecurityLockCoordinator.shared.lockProtectedApps(reason: .displayChange)
+        }
+
         // Update icon when overlay is dismissed after successful auth
         OverlayWindowService.shared.onUnlocked = { [weak self] appName in
             self?.menuBarController.iconState = .active
@@ -101,6 +114,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         WatchProximityService.shared.onWatchOutOfRange = { [weak self] in
             self?.lockOrCloseProtectedApps()
         }
+
+        NetworkSecurityMonitor.shared.reloadSettings()
+        DisplaySecurityMonitor.shared.reloadSettings()
 
     }
 

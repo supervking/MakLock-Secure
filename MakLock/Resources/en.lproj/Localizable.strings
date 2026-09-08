@@ -84,6 +84,17 @@
 "Search apps..." = "Search apps...";
 "Searching for Apple Watch..." = "Searching for Apple Watch...";
 "Security" = "Security";
+"Security Events" = "Security Events";
+"Lock after internet connection is lost" = "Lock after internet connection is lost";
+"Network loss delay" = "Network loss delay";
+"All connectivity probes must fail continuously before protected apps are locked. Reconnecting never unlocks them automatically." = "All connectivity probes must fail continuously before protected apps are locked. Reconnecting never unlocks them automatically.";
+"Lock when the trusted display setup changes" = "Lock when the trusted display setup changes";
+"Current displays: %@" = "Current displays: %@";
+"%lld trusted display fingerprints" = "%lld trusted display fingerprints";
+"Trust Current Display Setup" = "Trust Current Display Setup";
+"Adding, removing, or replacing a display locks protected apps immediately. Resolution-only changes are ignored." = "Adding, removing, or replacing a display locks protected apps immediately. Resolution-only changes are ignored.";
+"No Displays" = "No Displays";
+"Unknown Display" = "Unknown Display";
 "Select Applications" = "Select Applications";
 "Sensitivity" = "Sensitivity";
 "Set Backup Password" = "Set Backup Password";

@@ -24,7 +24,7 @@
 
 Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
 
-`MakLock-1.1.5-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
+`MakLock-1.2.0-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
 
 > The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
 
@@ -51,6 +51,10 @@ MakLock Secure is an independent maintenance release of [MakLock](https://github
 - In-app language selection: Follow System, English, or Simplified Chinese
 - Password-first lock screen for remote and keyboard-only Macs; the password field is focused automatically and Return submits it
 - Password input recovers keyboard focus after long idle periods, remote-session focus changes, or another window taking focus
+- Optional locking after every internet-connectivity probe fails continuously for 1, 2, or 5 minutes
+- Optional immediate locking when the trusted display fingerprint set changes; resolution-only changes are ignored
+
+Network recovery never unlocks protected apps automatically. Display fingerprints detect ordinary monitor additions and replacements, but hardware that perfectly clones a trusted display's EDID may not be distinguishable by macOS.
 
 ## Free and commercial options
 

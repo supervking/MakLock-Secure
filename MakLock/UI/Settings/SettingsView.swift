@@ -24,6 +24,6 @@ struct SettingsView: View {
                     Label("Watch", systemImage: "applewatch")
                 }
         }
-        .frame(width: 520, height: 400)
+        .frame(width: 560, height: 560)
     }
 }
