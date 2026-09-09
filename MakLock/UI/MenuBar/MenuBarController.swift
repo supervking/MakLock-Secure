@@ -5,6 +5,7 @@ import SwiftUI
 final class MenuBarController {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
+    private var aboutWindow: NSWindow?
 
     /// Current lock state displayed in the menu bar.
     enum IconState {
@@ -39,6 +40,9 @@ final class MenuBarController {
                 self?.hidePopover()
                 let screen = self?.statusItem?.button?.window?.screen
                 NotificationCenter.default.post(name: .openSettings, object: screen)
+            },
+            onAboutClicked: { [weak self] in
+                self?.showAboutWindow()
             },
             onQuitClicked: {
                 NSApplication.shared.terminate(nil)
@@ -75,6 +79,30 @@ final class MenuBarController {
         popover?.performClose(nil)
     }
 
+    private func showAboutWindow() {
+        if let aboutWindow {
+            aboutWindow.center()
+            aboutWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 360, height: 380),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = String(localized: "About MakLock")
+        window.contentView = NSHostingView(rootView: AboutView())
+        window.isReleasedWhenClosed = false
+        window.animationBehavior = .none
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        aboutWindow = window
+    }
+
     private func toggleProtection() {
         var settings = Defaults.shared.appSettings
         settings.isProtectionEnabled.toggle()
@@ -105,7 +133,10 @@ final class MenuBarController {
             symbolName = "exclamationmark.shield.fill"
         }
 
-        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "MakLock")
+        let image = NSImage(
+            systemSymbolName: symbolName,
+            accessibilityDescription: String(localized: "MakLock")
+        )
 
         if iconState == .displayAlert {
             let configuration = NSImage.SymbolConfiguration(paletteColors: [.systemRed])
@@ -116,7 +147,7 @@ final class MenuBarController {
             return
         }
 
-        button.toolTip = "MakLock"
+        button.toolTip = String(localized: "MakLock")
 
         // Add a small badge dot for locked state
         if iconState == .locked, let baseImage = image {

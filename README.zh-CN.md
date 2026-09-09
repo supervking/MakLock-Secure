@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="Resources/icon.png" width="128" height="128" alt="MakLock 图标">
+  <img src="Resources/icon-maclock.png" width="128" height="128" alt="MAC锁屏加密应用图标">
 </p>
 
-<h1 align="center">MakLock Secure</h1>
+<h1 align="center">MAC锁屏加密应用</h1>
 
 <p align="center">
-  具备持续认证锁定层的中英文 macOS 应用加锁工具。
+  Maclock Secure MacOS｜面向远程电脑防偷窥与隐私保护的开源 macOS 应用锁
 </p>
 
 <p align="center">
@@ -20,78 +20,138 @@
   <a href="https://github.com/supervking/MakLock-Secure/releases"><img src="https://img.shields.io/github/downloads/supervking/MakLock-Secure/total?style=flat-square&color=34C759&label=下载" alt="下载"></a>
 </p>
 
+适用于查找 **Mac锁屏、macOS应用锁、Mac应用加密、应用程序加锁、远程电脑防偷窥、远程办公隐私保护、显示器防窥** 方案的用户。
+
 ## 下载
 
-请从 [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest) 下载当前版本。
+下载适用于 macOS 13 及以上版本的 [Maclock Secure MacOS 1.5.2](https://github.com/supervking/MakLock-Secure/releases/tag/v1.5.2)：
 
-推荐下载 `MakLock-1.5.1-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
+- [通用版 DMG](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.2/Maclock-Secure-MacOS-1.5.2-universal.dmg)——推荐的拖拽安装包
+- [通用版 ZIP](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.2/Maclock-Secure-MacOS-1.5.2-universal.zip)——备用压缩包
+- 两个安装包都附带独立 SHA-256 校验文件
 
-> 当前发布包使用 ad-hoc 本地签名，尚未经过 Apple 公证。首次打开时，macOS 可能要求你在“系统设置 → 隐私与安全性”中确认打开。请在打开前核对发布页提供的 SHA-256 校验文件。
+发布包同时支持 Apple Silicon 和 Intel Mac，采用 ad-hoc 本地签名，尚未经过 Apple 公证。打开前请核对 SHA-256；首次运行时，macOS 可能要求在“系统设置 → 隐私与安全性”中确认打开。
 
-## MakLock Secure 是什么？
+## 这是什么软件？
 
-MakLock Secure 是基于 [MakLock](https://github.com/dutkiewiczmaciej/MakLock) 的独立维护版本。它可通过 Touch ID、Apple Watch 接近解锁或备用密码保护指定 macOS 应用；当受保护应用被打开或切换到前台时，MakLock 会显示锁定层，直到认证成功。
+MAC锁屏加密应用可为当前 macOS 账户中的指定应用增加独立认证锁定层。当受保护应用启动、切换到前台，或电脑进入设定的风险状态时，应用内容会被全屏遮挡，必须通过应用备用密码、可用的 Touch ID 或已配置的 Apple Watch 才能恢复访问。
 
-## 1.1.1 的安全改进
+它特别适合长期保持登录状态的 Mac mini、远程办公电脑、共享 Mac 和无人值守工作站。
 
-- 锁定层不会再因闲置计时而自动消失。
-- 正式发布版本不包含可直接关闭锁定层的全局快捷键。
-- 已关闭应用内自动更新，避免已验证版本被静默替换。
-- 应用界面提供英文与简体中文。
+## 远程电脑防偷窥与隐私保护
 
-## 功能
+| 远程使用场景 | 实际保护行为 |
+|---|---|
+| 现场人员打开聊天、浏览器、通讯或管理应用 | 全屏锁定层遮住内容并要求独立认证 |
+| RustDesk 等远程连接中断 | 可在所有网络探测持续失败一段时间后锁定受保护应用 |
+| 远程电脑长时间无人操作 | 达到闲置时间后自动锁定，指定应用也可选择自动关闭 |
+| 有人接入、替换或镜像显示器 | 立即遮挡桌面，并持续显示红色所有者认证警报 |
+| 显示器快速接入后马上拔出 | 即使显示器结构已经恢复，事件仍会锁存并保留安全记录 |
+| 远程控制重新连接或屏幕重新唤醒 | 密码框重新获得焦点，避免按键落入被保护应用 |
+| Mac mini 没有 Touch ID 键盘 | 自动使用密码流程，不会因为缺少指纹设备而失去解锁入口 |
 
-- Touch ID 认证，并提供备用密码
-- 可选 Apple Watch 接近解锁
-- 覆盖多显示器的全屏锁定层
-- 闲置超时（最长可设为 2 小时）或 Mac 休眠后重新锁定
-- 可为指定受保护应用启用自动关闭
-- 首次启动引导与菜单栏设置
-- 英文、简体中文界面
-- 应用内语言选择：跟随系统、English 或简体中文
-- 密码优先的锁定界面：适合远程或纯键盘 Mac，密码框自动聚焦，按 Return 即可提交解锁
-- 长时间锁定、远程会话焦点变化或其他窗口抢走焦点后，点击密码框会自动恢复键盘输入
-- 可选断网保护：所有联网探测连续失败 1、2 或 5 分钟后锁定受保护应用
-- 可选可信显示器保护：显示器结构发生变化时立即遮挡整个桌面；确认存在未授权配置后，持续显示静音红色全屏警报、macOS 通知和红色菜单栏盾牌
-- 短暂的显示器结构变化会在可信配置恢复后继续锁存，因此快速接入再拔出仍需所有者认证，并保留在12小时安全记录中；仅分辨率变化不会触发
-- 可选的所有者应急重启恢复配置只保存在本机应用状态中；警报只显示普通重启按钮，绝不显示私有恢复参数或进度
+### 推荐的远程电脑配置
 
-网络恢复后不会自动解锁。未授权显示器警报必须等可信显示器配置恢复并通过密码验证后才能解除。显示器指纹可以检测普通的新增、拔除和替换，但被动 HDMI 分配器或能完整复制可信显示器 EDID 的硬件可能无法被 macOS 区分。
+1. 为聊天、浏览器、密码、通讯和服务器管理应用分别启用保护。
+2. 开启“锁定时优先使用密码”，便于纯键盘和远程控制操作。
+3. 开启断网保护，并根据网络稳定性选择 1、2 或 5 分钟延迟。
+4. 将当前显示器登记为可信显示器，再启用显示器结构变化保护。
+5. 设置合适的闲置锁定时间，并为高敏感应用决定是否自动关闭。
+6. 妥善保管应用备用密码；不要把远程控制密码与应用密码设为同一密码。
 
-- 可选重启清理：Mac 真正重启后的单次 90 秒保护期内，关闭系统自动恢复的受保护应用；远程控制和系统应用始终排除
-- macOS 用户会话恢复或屏幕唤醒后重新聚焦密码框，远程用户无需点击即可直接输入
-- 密码框改用原生 AppKit 安全输入控件，并验证真实第一响应者，不再只依赖 SwiftUI 焦点状态
-- 密码模式使用可激活锁屏并临时隐藏受保护应用，避免 macOS 恢复其他前台应用时把密码输入泄漏给原应用
-- 密码错误依次限制 2 秒、4 秒、30 秒和 5 分钟；30 分钟内第五次错误后封锁密码解锁 3 小时
-- 安全记录只保存最近 12 小时的非敏感事件，最多 200 条
+### 隐私保护边界
 
-密码封锁状态保存在 macOS Keychain 中，重启 MakLock 或 Mac 都不会清除。密码封锁期间仍可使用 Touch ID 或 Apple Watch。
+本软件保护的是当前已登录 macOS 账户内的应用可见内容，不会加密 RustDesk 或其他远程控制协议，也不承诺阻止拥有管理员、Root 或系统录屏权限的人。它不能替代 FileVault、独立 macOS 用户、系统锁屏、远程控制账号安全和现场物理管理。
 
-应急重启恢复默认关闭，只能在通过认证的“设置 → 安全性 → 显示器应急恢复”中配置。重启请求前会同步写入本机状态，避免应用签名更新阻塞无人值守启动。它只会在验证成功的当前 Boot 中解除显示器全屏警报；受保护应用仍保持退出，并继续要求正常 MakLock 认证。
+## 当前功能
 
-## 免费与商业方案对比
+### 应用认证与锁定
 
-MakLock Secure 可免费下载，源码采用 MIT 许可证。下表是于 **2026-08-17** 核验的价格与公开功能范围快照，并非独立安全评测；商业软件的功能、价格和 App Store 各地区售价都可能变化。
+- 应用启动和切换到前台时分别要求认证
+- 密码优先锁定界面，密码框自动聚焦，按 Return 提交
+- macOS 实际提供可用生物识别硬件时支持 Touch ID
+- 可选 Apple Watch 接近解锁及佩戴状态判断
+- 所有显示器上的全屏遮挡层
+- 原生 AppKit 安全密码输入与真实第一响应者检查
+- 正式版本不存在开发跳过按钮或全局解除锁定快捷键
 
-| | MakLock Secure | AppLocker | Cisdem AppCrypt for Mac |
-|---|---|---|---|
-| 价格／使用方式 | 免费下载；MIT 开源 | 免费下载，含 App 内购买；美国 App Store 显示为 $2.99／月、$11.99／年或 $17.99 终身版 | 3 天完整功能试用；厂商 1 台 Mac 报价为 $19.99／年或 $39.99 一次性购买 |
-| 已公开的应用加锁方式 | Touch ID、Apple Watch 接近解锁或备用密码 | 密码、Touch ID、Bluetooth ID 或 Network ID | 密码加锁，并提供应用允许列表模式 |
-| 已公开的其他范围 | 单应用锁定层、闲置／休眠后锁定、可选自动关闭 | 访问记录 | 网站拦截、计划任务和自动重新锁定 |
-| 源码可用性 | 是——本仓库 | 引用的 App Store 页面未说明 | 引用的厂商页面未说明 |
+### 远程、闲置与会话保护
 
-资料来源：[AppLocker 美国 App Store 页面](https://apps.apple.com/us/app/applocker-passcode-lock-apps/id1132845904?platform=mac)、[Cisdem AppCrypt 功能与试用说明](https://www.cisdem.com/appcrypt.html) 与 [Cisdem AppCrypt for Mac 价格页](https://www.cisdem.com/appcrypt-mac/buy.html)。购买前请以厂商当期条款和售价为准。
+- 1 分钟至 2 小时闲置锁定
+- Mac 睡眠或 Apple Watch 离开范围时锁定
+- 可为指定应用启用闲置后自动关闭
+- 所有联网探测连续失败 1、2 或 5 分钟后锁定
+- 网络恢复不会自动解锁应用
+- 远程控制重连、屏幕唤醒和会话焦点变化后恢复密码输入
+
+### 显示器防窥与应急恢复
+
+- 检测普通的显示器新增、拔除、替换、镜像和取消镜像
+- 结构变化时先立即遮挡桌面，再显示持续红色警报、静音通知和红色菜单栏状态
+- 快速接入再拔出仍会锁存，不能靠拔线清除警报
+- 分辨率、刷新率、显示器睡眠和桌面尺寸变化不进入结构篡改警报
+- 所有者可配置隐藏应急重启恢复；完整验证后只绕过当前 Boot 的显示器警报，受保护应用仍保持关闭和独立认证
+- 可选真实重启后的单次 90 秒恢复应用清理
+
+### 本机状态与安全记录
+
+- 备用密码和密码错误限制保存在 macOS Keychain
+- 密码错误依次限制 2 秒、4 秒、30 秒和 5 分钟
+- 30 分钟内第五次错误后封锁密码解锁 3 小时
+- 非敏感安全事件只保留最近 12 小时，最多 200 条
+- English 与简体中文界面，可在应用内切换语言
+
+## 应用页面截图
+
+以下图片来自实际 Release 界面，不包含开发跳过按钮、密码、个人账号或私有配置。
+
+### 菜单栏
+
+![MAC锁屏加密应用菜单栏](Resources/screenshots/zh-Hans/01-menubar.png)
+
+### 通用设置
+
+![MAC锁屏加密应用通用设置](Resources/screenshots/zh-Hans/02-general.png)
+
+### 受保护应用
+
+![MAC锁屏加密应用受保护应用页面](Resources/screenshots/zh-Hans/03-apps.png)
+
+### 安全性设置
+
+![MAC锁屏加密应用安全性设置](Resources/screenshots/zh-Hans/04-security.png)
+
+### Apple Watch
+
+![MAC锁屏加密应用 Apple Watch 页面](Resources/screenshots/zh-Hans/05-watch.png)
+
+### 关于
+
+![关于 Maclock Secure MacOS](Resources/screenshots/zh-Hans/06-about.png)
+
+### 密码锁定界面
+
+![MAC锁屏加密应用密码锁定界面](Resources/screenshots/zh-Hans/07-password-lock.png)
+
+### 未授权显示器警报
+
+![MAC锁屏加密应用未授权显示器警报](Resources/screenshots/zh-Hans/08-display-alert.png)
 
 ## 安装步骤
 
-1. 从 [Releases](https://github.com/supervking/MakLock-Secure/releases/latest) 下载最新版 DMG。
-2. 将 DMG 与发布页的 `.sha256` 校验文件进行比对。
-3. 打开 DMG，把 `MakLock.app` 拖到“应用程序”。
-4. 打开 MakLock，先设置备用密码，再添加需要保护的应用。
+1. 下载最新版 DMG 和对应的 `.sha256` 文件。
+2. 核对安装包 SHA-256。
+3. 打开 DMG，将 `MakLock.app` 拖入“应用程序”。
+4. 如果 macOS 阻止首次打开，请到“系统设置 → 隐私与安全性”确认。
+5. 首先设置应用备用密码，再添加需要保护的应用。
 
-如需切换界面语言，请打开“设置 → 通用 → 语言”，选择“跟随系统”、“English”或“简体中文”，再点“重新启动 MakLock”。
+## 兼容性
 
-远程或纯键盘 Mac 默认启用“设置 → 安全性 → 锁定时优先使用密码”：锁定层会自动聚焦密码框，输入密码后按 Return 即可解锁。如偏好原来的 Touch ID 优先流程，可关闭此开关。
+- macOS 13 或更新版本
+- Apple Silicon 与 Intel Mac
+- Touch ID 不是必需条件；桌面 Mac 需要另行配对兼容的 Touch ID 键盘
+- Apple Watch 为可选功能
+- 不需要云账号或订阅
 
 ## 从源码构建
 
@@ -101,11 +161,7 @@ cd MakLock-Secure
 xcodebuild -project MakLock.xcodeproj -scheme MakLock -configuration Release CODE_SIGNING_ALLOWED=NO build
 ```
 
-需要 Xcode 15 或更新版本，以及 macOS 13 或更新版本。
-
-## 安全边界
-
-MakLock 保护的是当前 macOS 账户内的应用访问，不能替代独立 macOS 用户账户、FileVault 或系统锁屏。请妥善保管备用密码，离开电脑时仍应锁定 macOS。
+需要 Xcode 15 或更新版本。为保持配置、Keychain 和升级兼容性，稳定 Bundle ID 继续使用 `com.makmak.MakLock`。
 
 ## 致谢与许可证
 

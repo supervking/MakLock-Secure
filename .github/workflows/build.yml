@@ -21,20 +21,22 @@ jobs:
 
       - name: Build
         run: |
+          set -o pipefail
           xcodebuild build \
             -project MakLock.xcodeproj \
             -scheme MakLock \
             -destination "${{ matrix.destination }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
-            | xcpretty || true
+            | xcpretty
 
       - name: Build Release
         run: |
+          set -o pipefail
           xcodebuild build \
             -project MakLock.xcodeproj \
             -scheme MakLock \
             -destination "${{ matrix.destination }}" \
             -configuration Release \
             CODE_SIGNING_ALLOWED=NO \
-            | xcpretty || true
+            | xcpretty
