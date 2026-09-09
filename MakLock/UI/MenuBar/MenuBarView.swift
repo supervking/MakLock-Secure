@@ -5,6 +5,7 @@ import SwiftUI
 struct MenuBarView: View {
     let onToggleProtection: () -> Void
     let onSettingsClicked: () -> Void
+    let onAboutClicked: () -> Void
     let onQuitClicked: () -> Void
 
     @State private var isProtectionEnabled = Defaults.shared.appSettings.isProtectionEnabled
@@ -74,7 +75,7 @@ struct MenuBarView: View {
             }
 
             MenuBarButton(title: "About MakLock", icon: "info.circle") {
-                showAboutWindow()
+                onAboutClicked()
             }
 
             Divider()
@@ -90,20 +91,6 @@ struct MenuBarView: View {
         .frame(width: 260)
     }
 
-    private func showAboutWindow() {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 360, height: 380),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = String(localized: "About MakLock")
-        window.contentView = NSHostingView(rootView: AboutView())
-        window.isReleasedWhenClosed = true
-        window.center()
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-    }
 }
 
 // MARK: - Menu Bar Button

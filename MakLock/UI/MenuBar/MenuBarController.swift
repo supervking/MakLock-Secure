@@ -5,6 +5,7 @@ import SwiftUI
 final class MenuBarController {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
+    private var aboutWindow: NSWindow?
 
     /// Current lock state displayed in the menu bar.
     enum IconState {
@@ -40,6 +41,9 @@ final class MenuBarController {
                 let screen = self?.statusItem?.button?.window?.screen
                 NotificationCenter.default.post(name: .openSettings, object: screen)
             },
+            onAboutClicked: { [weak self] in
+                self?.showAboutWindow()
+            },
             onQuitClicked: {
                 NSApplication.shared.terminate(nil)
             }
@@ -73,6 +77,30 @@ final class MenuBarController {
 
     private func hidePopover() {
         popover?.performClose(nil)
+    }
+
+    private func showAboutWindow() {
+        if let aboutWindow {
+            aboutWindow.center()
+            aboutWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 360, height: 380),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = String(localized: "About MakLock")
+        window.contentView = NSHostingView(rootView: AboutView())
+        window.isReleasedWhenClosed = false
+        window.animationBehavior = .none
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        aboutWindow = window
     }
 
     private func toggleProtection() {
