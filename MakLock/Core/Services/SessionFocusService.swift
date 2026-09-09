@@ -31,9 +31,28 @@ final class SessionFocusService {
             name: NSWorkspace.didWakeNotification,
             object: nil
         )
+        center.addObserver(
+            self,
+            selector: #selector(handleApplicationActivation),
+            name: NSWorkspace.didActivateApplicationNotification,
+            object: nil
+        )
     }
 
     @objc private func handleSessionAvailable(_ notification: Notification) {
+        scheduleRecovery(after: 0.1)
+    }
+
+    @objc private func handleApplicationActivation(_ notification: Notification) {
+        guard let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+              application.bundleIdentifier != "com.makmak.MakLock" else {
+            return
+        }
+
+        scheduleRecovery(after: 0)
+    }
+
+    private func scheduleRecovery(after delay: TimeInterval) {
         pendingRecovery?.cancel()
 
         let workItem = DispatchWorkItem {
@@ -48,6 +67,6 @@ final class SessionFocusService {
             }
         }
         pendingRecovery = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
     }
 }
