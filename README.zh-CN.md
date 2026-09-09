@@ -24,7 +24,7 @@
 
 请从 [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest) 下载当前版本。
 
-推荐下载 `MakLock-1.3.2-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
+推荐下载 `MakLock-1.4.0-macos-universal.dmg` 拖拽安装包：它支持 macOS 13 及以上版本，并同时支持 Apple Silicon 和 Intel Mac。打开 DMG 后，将 `MakLock.app` 拖入“应用程序”即可；ZIP 仍作为备用下载包保留。
 
 > 当前发布包使用 ad-hoc 本地签名，尚未经过 Apple 公证。首次打开时，macOS 可能要求你在“系统设置 → 隐私与安全性”中确认打开。请在打开前核对发布页提供的 SHA-256 校验文件。
 
@@ -52,9 +52,9 @@ MakLock Secure 是基于 [MakLock](https://github.com/dutkiewiczmaciej/MakLock) 
 - 密码优先的锁定界面：适合远程或纯键盘 Mac，密码框自动聚焦，按 Return 即可提交解锁
 - 长时间锁定、远程会话焦点变化或其他窗口抢走焦点后，点击密码框会自动恢复键盘输入
 - 可选断网保护：所有联网探测连续失败 1、2 或 5 分钟后锁定受保护应用
-- 可选显示器保护：可信显示器指纹集合变化时立即锁定，仅分辨率变化不会触发
+- 可选可信显示器保护：显示器结构发生变化时立即遮挡整个桌面；确认存在未授权配置后，持续显示静音红色全屏警报、macOS 通知和红色菜单栏盾牌
 
-网络恢复后不会自动解锁。显示器指纹可以检测普通的新增、拔除和替换，但如果硬件能完整复制可信显示器的 EDID，macOS 可能无法区分。
+网络恢复后不会自动解锁。未授权显示器警报必须等可信显示器配置恢复并通过密码验证后才能解除。显示器指纹可以检测普通的新增、拔除和替换，但被动 HDMI 分配器或能完整复制可信显示器 EDID 的硬件可能无法被 macOS 区分。
 
 - 可选重启清理：Mac 真正重启后的单次 90 秒保护期内，关闭系统自动恢复的受保护应用；远程控制和系统应用始终排除
 - macOS 用户会话恢复或屏幕唤醒后重新聚焦密码框，远程用户无需点击即可直接输入

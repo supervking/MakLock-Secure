@@ -90,6 +90,108 @@ struct DisplayTrustTracker {
     }
 }
 
+struct DisplayConfigurationStatus: Equatable {
+    let currentFingerprints: [String]
+    let trustedFingerprints: [String]
+
+    var isConfigured: Bool {
+        !trustedFingerprints.isEmpty
+    }
+
+    var isTrusted: Bool {
+        isConfigured && currentFingerprints.sorted() == trustedFingerprints.sorted()
+    }
+
+    var unexpectedDisplayCount: Int {
+        Self.differenceCount(source: currentFingerprints, removing: trustedFingerprints)
+    }
+
+    var missingTrustedDisplayCount: Int {
+        Self.differenceCount(source: trustedFingerprints, removing: currentFingerprints)
+    }
+
+    private static func differenceCount(source: [String], removing: [String]) -> Int {
+        var remainingCounts = Dictionary(grouping: removing, by: { $0 })
+            .mapValues(\.count)
+        var difference = 0
+
+        for fingerprint in source {
+            if let count = remainingCounts[fingerprint], count > 0 {
+                remainingCounts[fingerprint] = count - 1
+            } else {
+                difference += 1
+            }
+        }
+
+        return difference
+    }
+}
+
+enum DisplayIntrusionAlertPhase: Equatable {
+    case hidden
+    case evaluating
+    case intrusion
+}
+
+enum DisplayIntrusionAlertTransition: Equatable {
+    case none
+    case showEvaluatingShield
+    case dismissTransientShield
+    case confirmIntrusion
+    case refreshIntrusion
+    case awaitAuthentication
+}
+
+struct DisplayIntrusionAlertState: Equatable {
+    private(set) var phase: DisplayIntrusionAlertPhase = .hidden
+
+    mutating func beginPotentialChange() -> DisplayIntrusionAlertTransition {
+        guard phase == .hidden else { return .none }
+        phase = .evaluating
+        return .showEvaluatingShield
+    }
+
+    mutating func observe(
+        configuration status: DisplayConfigurationStatus
+    ) -> DisplayIntrusionAlertTransition {
+        guard status.isConfigured else {
+            if phase == .evaluating {
+                phase = .hidden
+                return .dismissTransientShield
+            }
+            return .none
+        }
+
+        if status.isTrusted {
+            switch phase {
+            case .hidden:
+                return .none
+            case .evaluating:
+                phase = .hidden
+                return .dismissTransientShield
+            case .intrusion:
+                return .awaitAuthentication
+            }
+        }
+
+        let wasConfirmed = phase == .intrusion
+        phase = .intrusion
+        return wasConfirmed ? .refreshIntrusion : .confirmIntrusion
+    }
+
+    mutating func authenticate(
+        configuration status: DisplayConfigurationStatus
+    ) -> Bool {
+        guard phase == .intrusion, status.isTrusted else { return false }
+        phase = .hidden
+        return true
+    }
+
+    mutating func reset() {
+        phase = .hidden
+    }
+}
+
 struct ThresholdTriggerLatch {
     private(set) var hasTriggered = false
 

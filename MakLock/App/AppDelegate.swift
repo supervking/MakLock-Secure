@@ -8,8 +8,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         menuBarController.setup()
 
-        // Request notification permission (for Watch unlock notifications)
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        // MakLock notifications are intentionally silent.
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { _, _ in }
 
         // Show onboarding on first launch
         OnboardingWindowController.shared.showIfNeeded()
@@ -30,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let watchCanUnlock = Defaults.shared.appSettings.useWatchUnlock
                 && watch.isWatchInRange
                 && (watch.isWatchUnlocked ?? true)
+                && !DisplayIntrusionAlertService.shared.isShowing
             if watchCanUnlock {
                 AppMonitorService.shared.markAuthenticated(app.bundleIdentifier)
                 WatchUnlockToast.shared.show(for: app.bundleIdentifier)
@@ -37,7 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 return
             }
             OverlayWindowService.shared.show(for: app)
-            self?.menuBarController.iconState = .locked
+            self?.showLockedMenuBarState()
             SecurityEventStore.shared.record(
                 kind: .protectedAppActivation,
                 action: .locked,
@@ -48,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         SecurityLockCoordinator.shared.onLockRequired = { [weak self] app, _ in
             OverlayWindowService.shared.show(for: app)
-            self?.menuBarController.iconState = .locked
+            self?.showLockedMenuBarState()
         }
 
         NetworkSecurityMonitor.shared.onNetworkLoss = {
@@ -58,16 +59,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             )
         }
 
-        DisplaySecurityMonitor.shared.onUntrustedDisplayChange = {
+        DisplayIntrusionAlertService.shared.onAlertStateChanged = { [weak self] isVisible in
+            guard let self else { return }
+            if isVisible {
+                self.menuBarController.iconState = .displayAlert
+            } else {
+                self.restoreMenuBarIconAfterDisplayAlert()
+            }
+        }
+
+        DisplaySecurityMonitor.shared.onPotentialDisplayExposure = {
+            DisplayIntrusionAlertService.shared.beginPotentialDisplayChange()
+        }
+
+        DisplaySecurityMonitor.shared.onUntrustedDisplayChange = { status in
+            guard Defaults.shared.appSettings.isProtectionEnabled else { return }
+            DisplayIntrusionAlertService.shared.observe(configuration: status)
             SecurityLockCoordinator.shared.lockProtectedApps(
                 reason: .displayChange,
-                numericDetail: DisplaySecurityMonitor.currentDisplays().count
+                numericDetail: status.currentFingerprints.count
             )
+            Self.sendDisplaySecurityNotification(status: status)
+        }
+
+        DisplaySecurityMonitor.shared.onTrustedDisplayConfiguration = { status in
+            DisplayIntrusionAlertService.shared.observe(configuration: status)
         }
 
         // Update icon when overlay is dismissed after successful auth
         OverlayWindowService.shared.onUnlocked = { [weak self] appName in
-            self?.menuBarController.iconState = .active
+            if DisplayIntrusionAlertService.shared.isShowing {
+                self?.menuBarController.iconState = .displayAlert
+            } else {
+                self?.menuBarController.iconState = .active
+            }
             Self.sendUnlockNotification(appName: appName)
         }
 
@@ -121,6 +146,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Wire up Watch proximity → auto-unlock when Watch returns in range
         WatchProximityService.shared.onWatchInRange = { [weak self] in
             guard OverlayWindowService.shared.isShowing else { return }
+            guard !DisplayIntrusionAlertService.shared.isShowing else { return }
             // Only auto-unlock if Watch is on wrist (unlocked)
             guard WatchProximityService.shared.isWatchUnlocked ?? true else { return }
             let lockedBundleID = OverlayWindowService.shared.currentBundleIdentifier
@@ -171,7 +197,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if showedOverlay {
-            menuBarController.iconState = .locked
+            showLockedMenuBarState()
         }
 
         SecurityEventStore.shared.record(
@@ -208,6 +234,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func restoreMenuBarIconAfterDisplayAlert() {
+        if OverlayWindowService.shared.isShowing {
+            menuBarController.iconState = .locked
+        } else if Defaults.shared.appSettings.isProtectionEnabled {
+            menuBarController.iconState = .active
+        } else {
+            menuBarController.iconState = .idle
+        }
+    }
+
+    private func showLockedMenuBarState() {
+        menuBarController.iconState = DisplayIntrusionAlertService.shared.isShowing
+            ? .displayAlert
+            : .locked
+    }
+
     // MARK: - Notifications
 
     /// Post a local notification when Watch auto-unlocks an app.
@@ -226,14 +268,48 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
-    private static func sendNotification(title: String, body: String) {
+    static func sendDisplaySecurityNotification(status: DisplayConfigurationStatus) {
+        let title: String
+        let body: String
+
+        if status.unexpectedDisplayCount > 0 {
+            title = String(localized: "Unauthorized Display Detected")
+            body = String.localizedStringWithFormat(
+                NSLocalizedString(
+                    "Illegal display connected. Disconnect it immediately. Current displays: %lld.",
+                    comment: "Unauthorized display notification"
+                ),
+                Int64(status.currentFingerprints.count)
+            )
+        } else {
+            title = String(localized: "Trusted Display Disconnected")
+            body = String(localized: "The trusted display setup changed. Check the display connection immediately.")
+        }
+
+        sendNotification(
+            title: title,
+            body: body,
+            identifier: "maklock-display-intrusion",
+            interruptionLevel: .timeSensitive
+        )
+    }
+
+    private static func sendNotification(
+        title: String,
+        body: String,
+        identifier: String = "maklock-\(UUID().uuidString)",
+        interruptionLevel: UNNotificationInterruptionLevel? = nil
+    ) {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = nil
+        if let interruptionLevel {
+            content.interruptionLevel = interruptionLevel
+        }
 
         let request = UNNotificationRequest(
-            identifier: "maklock-\(UUID().uuidString)",
+            identifier: identifier,
             content: content,
             trigger: nil
         )

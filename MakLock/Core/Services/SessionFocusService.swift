@@ -56,15 +56,23 @@ final class SessionFocusService {
         pendingRecovery?.cancel()
 
         let workItem = DispatchWorkItem {
-            guard OverlayWindowService.shared.restorePasswordFocusAfterSessionActivation(completion: { succeeded in
+            let recordResult: (Bool) -> Void = { succeeded in
                 SecurityEventStore.shared.record(
                     kind: .sessionFocusRecovery,
                     action: .focusRestored,
                     succeeded: succeeded
                 )
-            }) else {
+            }
+
+            if DisplayIntrusionAlertService.shared.restoreFocusAfterSessionActivation(
+                completion: recordResult
+            ) {
                 return
             }
+
+            _ = OverlayWindowService.shared.restorePasswordFocusAfterSessionActivation(
+                completion: recordResult
+            )
         }
         pendingRecovery = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)

@@ -14,6 +14,7 @@ struct SecuritySettingsView: View {
     @State private var lockOnDisplayChange = Defaults.shared.lockOnDisplayChange
     @State private var currentDisplays = DisplaySecurityMonitor.currentDisplays()
     @State private var trustedDisplayCount = Defaults.shared.trustedDisplayFingerprints.count
+    @State private var showTrustDisplayConfirmation = false
     @State private var quitProtectedAppsAfterRestart = Defaults.shared.quitProtectedAppsAfterRestart
     @State private var passwordBruteForceProtectionEnabled = Defaults.shared.passwordBruteForceProtectionEnabled
     @State private var recentSecurityEvents: [SecurityEventRecord] = []
@@ -102,6 +103,9 @@ struct SecuritySettingsView: View {
                         }
                         Defaults.shared.lockOnDisplayChange = enabled
                         DisplaySecurityMonitor.shared.reloadSettings()
+                        if !enabled {
+                            DisplayIntrusionAlertService.shared.dismissForProtectionDisabled()
+                        }
                     }
 
                 if lockOnDisplayChange {
@@ -119,10 +123,10 @@ struct SecuritySettingsView: View {
                     .foregroundColor(.secondary)
 
                     Button("Trust Current Display Setup") {
-                        trustCurrentDisplays()
+                        authenticateBeforeTrustingDisplays()
                     }
 
-                    Text("Adding, removing, or replacing a display locks protected apps immediately. Resolution-only changes are ignored.")
+                    Text("Adding, removing, mirroring, or replacing a display immediately hides the desktop and locks protected apps. The silent red alert remains until the trusted setup returns and you authenticate.")
                         .font(MakLockTypography.caption)
                         .foregroundColor(.secondary)
                 }
@@ -221,6 +225,18 @@ struct SecuritySettingsView: View {
         .sheet(isPresented: $showPasswordSheet) {
             passwordSheet
         }
+        .confirmationDialog(
+            "Trust Current Display Setup?",
+            isPresented: $showTrustDisplayConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Trust Current Display Setup", role: .destructive) {
+                trustCurrentDisplays()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Only trust this setup when every connected display is under your control.")
+        }
     }
 
     // MARK: - Password Sheet
@@ -309,6 +325,16 @@ struct SecuritySettingsView: View {
         refreshDisplayStatus()
     }
 
+    private func authenticateBeforeTrustingDisplays() {
+        AuthenticationService.shared.authenticateWithSystemFallback(
+            reason: String(localized: "Authorize trusted display change")
+        ) { result in
+            if case .success = result {
+                showTrustDisplayConfirmation = true
+            }
+        }
+    }
+
     private func refreshDisplayStatus() {
         currentDisplays = DisplaySecurityMonitor.currentDisplays()
         trustedDisplayCount = Defaults.shared.trustedDisplayFingerprints.count
@@ -361,6 +387,10 @@ struct SecuritySettingsView: View {
         switch action {
         case .locked:
             return String(localized: "Locked")
+        case .alertShown:
+            return String(localized: "Alert shown")
+        case .alertDismissed:
+            return String(localized: "Alert dismissed")
         case .gracefulQuit:
             return String(localized: "Quit")
         case .forcedQuit:

@@ -14,6 +14,8 @@ final class MenuBarController {
         case active
         /// An overlay is currently displayed.
         case locked
+        /// An unauthorized display incident is active.
+        case displayAlert
     }
 
     var iconState: IconState = .idle {
@@ -52,6 +54,11 @@ final class MenuBarController {
 
     @objc private func togglePopover(_ sender: Any?) {
         guard let button = statusItem?.button else { return }
+        if DisplayIntrusionAlertService.shared.isShowing {
+            _ = DisplayIntrusionAlertService.shared.restoreFocusAfterSessionActivation { _ in }
+            return
+        }
+
         if let popover, popover.isShown {
             hidePopover()
         } else {
@@ -74,10 +81,12 @@ final class MenuBarController {
         Defaults.shared.appSettings = settings
 
         if !settings.isProtectionEnabled {
+            DisplayIntrusionAlertService.shared.dismissForProtectionDisabled()
             OverlayWindowService.shared.dismissAll()
             iconState = .idle
         } else {
             iconState = .active
+            DisplaySecurityMonitor.shared.reloadSettings()
         }
     }
 
@@ -91,9 +100,22 @@ final class MenuBarController {
             symbolName = "lock"
         case .locked:
             symbolName = "lock.fill"
+        case .displayAlert:
+            symbolName = "exclamationmark.shield.fill"
         }
 
         let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "MakLock")
+
+        if iconState == .displayAlert {
+            let configuration = NSImage.SymbolConfiguration(paletteColors: [.systemRed])
+            let alertImage = image?.withSymbolConfiguration(configuration)
+            alertImage?.isTemplate = false
+            button.image = alertImage
+            button.toolTip = String(localized: "Unauthorized Display Detected")
+            return
+        }
+
+        button.toolTip = "MakLock"
 
         // Add a small badge dot for locked state
         if iconState == .locked, let baseImage = image {

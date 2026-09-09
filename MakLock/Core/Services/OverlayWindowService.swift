@@ -168,7 +168,12 @@ final class OverlayWindowService {
     }
 
     private func makePasswordWindowKeyAndFocusField() -> Bool {
-        guard isShowing, isPasswordInputEnabled, !isTouchIDMode else { return false }
+        guard isShowing,
+              isPasswordInputEnabled,
+              !isTouchIDMode,
+              !DisplayIntrusionAlertService.shared.isShowing else {
+            return false
+        }
 
         let primaryWindow = primaryOverlayWindow()
 

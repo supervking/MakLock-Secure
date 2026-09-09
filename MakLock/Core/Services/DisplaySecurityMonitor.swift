@@ -24,13 +24,15 @@ private func displaySecurityCallback(
 ) {
     guard let userInfo else { return }
     let monitor = Unmanaged<DisplaySecurityMonitor>.fromOpaque(userInfo).takeUnretainedValue()
-    monitor.scheduleEvaluation()
+    monitor.handleDisplayReconfiguration(flags: flags)
 }
 
 final class DisplaySecurityMonitor {
     static let shared = DisplaySecurityMonitor()
 
-    var onUntrustedDisplayChange: (() -> Void)?
+    var onPotentialDisplayExposure: (() -> Void)?
+    var onUntrustedDisplayChange: ((DisplayConfigurationStatus) -> Void)?
+    var onTrustedDisplayConfiguration: ((DisplayConfigurationStatus) -> Void)?
 
     private var isStarted = false
     private var pendingEvaluation: DispatchWorkItem?
@@ -85,11 +87,29 @@ final class DisplaySecurityMonitor {
         Defaults.shared.trustedDisplayFingerprints = displays.map(\.fingerprint).sorted()
         trustTracker.reset()
         NSLog("[MakLock] Trusted display baseline updated (%d displays)", displays.count)
+        if isStarted {
+            evaluateCurrentDisplays()
+        }
     }
 
-    func scheduleEvaluation() {
+    func handleDisplayReconfiguration(flags: CGDisplayChangeSummaryFlags) {
         DispatchQueue.main.async { [weak self] in
             guard let self, self.isStarted else { return }
+
+            let exposureFlags: CGDisplayChangeSummaryFlags = [
+                .beginConfigurationFlag,
+                .addFlag,
+                .removeFlag,
+                .enabledFlag,
+                .disabledFlag,
+                .mirrorFlag,
+                .unMirrorFlag,
+                .setMainFlag
+            ]
+            if !flags.intersection(exposureFlags).isEmpty {
+                self.onPotentialDisplayExposure?()
+            }
+
             self.pendingEvaluation?.cancel()
 
             let workItem = DispatchWorkItem { [weak self] in
@@ -98,6 +118,13 @@ final class DisplaySecurityMonitor {
             self.pendingEvaluation = workItem
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: workItem)
         }
+    }
+
+    static func currentConfigurationStatus() -> DisplayConfigurationStatus {
+        DisplayConfigurationStatus(
+            currentFingerprints: currentDisplays().map(\.fingerprint),
+            trustedFingerprints: Defaults.shared.trustedDisplayFingerprints
+        )
     }
 
     static func currentDisplays() -> [DisplayDescriptor] {
@@ -125,15 +152,43 @@ final class DisplaySecurityMonitor {
         }
     }
 
+    static func descriptor(for screen: NSScreen) -> DisplayDescriptor? {
+        let screenNumberKey = NSDeviceDescriptionKey("NSScreenNumber")
+        guard let displayID = (screen.deviceDescription[screenNumberKey] as? NSNumber)?.uint32Value else {
+            return nil
+        }
+
+        return DisplayDescriptor(
+            displayID: displayID,
+            vendorID: CGDisplayVendorNumber(displayID),
+            productID: CGDisplayModelNumber(displayID),
+            serialNumber: CGDisplaySerialNumber(displayID),
+            identityComponent: stableIdentityComponent(for: displayID),
+            isBuiltIn: CGDisplayIsBuiltin(displayID) != 0,
+            name: screen.localizedName
+        )
+    }
+
     private func evaluateCurrentDisplays() {
         guard Defaults.shared.lockOnDisplayChange else { return }
 
-        let current = Self.currentDisplays().map(\.fingerprint)
-        let trusted = Defaults.shared.trustedDisplayFingerprints
-        guard trustTracker.observe(current: current, trusted: trusted) else { return }
+        let status = Self.currentConfigurationStatus()
+        if status.isTrusted || !status.isConfigured {
+            _ = trustTracker.observe(
+                current: status.currentFingerprints,
+                trusted: status.trustedFingerprints
+            )
+            onTrustedDisplayConfiguration?(status)
+            return
+        }
+
+        guard trustTracker.observe(
+            current: status.currentFingerprints,
+            trusted: status.trustedFingerprints
+        ) else { return }
 
         NSLog("[MakLock] Untrusted display configuration detected")
-        onUntrustedDisplayChange?()
+        onUntrustedDisplayChange?(status)
     }
 
     private static func screenName(for displayID: CGDirectDisplayID) -> String {

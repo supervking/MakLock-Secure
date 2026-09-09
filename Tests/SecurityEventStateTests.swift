@@ -13,6 +13,15 @@ enum SecurityEventStateTests {
         duplicateTrustedFingerprintTriggersImmediately()
         secondUnknownDisplayChangeTriggersAgain()
         returningToTrustedDisplayResetsMismatch()
+        displayConfigurationCountsUnexpectedAndMissingDisplays()
+        displayConfigurationCountsMissingTrustedDisplays()
+        potentialDisplayChangeShowsEvaluatingShield()
+        trustedEvaluationDismissesTransientShield()
+        unconfiguredBaselineDismissesTransientShield()
+        confirmedIntrusionRemainsAfterDisplayRemoval()
+        connectedUntrustedDisplayCannotBeAuthenticatedAway()
+        restoredDisplayConfigurationCanBeAuthenticated()
+        repeatedDisplayCallbacksDoNotRestartConfirmedIncident()
         thresholdTriggersOnlyOnceUntilRecovery()
         print("Security event state tests passed")
     }
@@ -91,6 +100,104 @@ enum SecurityEventStateTests {
         precondition(tracker.observe(current: changed, trusted: trusted))
         precondition(!tracker.observe(current: trusted, trusted: trusted))
         precondition(tracker.observe(current: changed, trusted: trusted))
+    }
+
+    private static func displayConfigurationCountsUnexpectedAndMissingDisplays() {
+        let status = DisplayConfigurationStatus(
+            currentFingerprints: ["trusted-display", "unknown-display", "unknown-display"],
+            trustedFingerprints: ["trusted-display"]
+        )
+
+        precondition(!status.isTrusted)
+        precondition(status.unexpectedDisplayCount == 2)
+        precondition(status.missingTrustedDisplayCount == 0)
+    }
+
+    private static func displayConfigurationCountsMissingTrustedDisplays() {
+        let status = DisplayConfigurationStatus(
+            currentFingerprints: ["trusted-display"],
+            trustedFingerprints: ["trusted-display", "trusted-secondary"]
+        )
+
+        precondition(!status.isTrusted)
+        precondition(status.unexpectedDisplayCount == 0)
+        precondition(status.missingTrustedDisplayCount == 1)
+    }
+
+    private static func potentialDisplayChangeShowsEvaluatingShield() {
+        var state = DisplayIntrusionAlertState()
+
+        precondition(state.beginPotentialChange() == .showEvaluatingShield)
+        precondition(state.phase == .evaluating)
+    }
+
+    private static func trustedEvaluationDismissesTransientShield() {
+        var state = DisplayIntrusionAlertState()
+        _ = state.beginPotentialChange()
+
+        precondition(state.observe(configuration: trustedDisplayStatus()) == .dismissTransientShield)
+        precondition(state.phase == .hidden)
+    }
+
+    private static func unconfiguredBaselineDismissesTransientShield() {
+        var state = DisplayIntrusionAlertState()
+        _ = state.beginPotentialChange()
+        let unconfigured = DisplayConfigurationStatus(
+            currentFingerprints: ["current-display"],
+            trustedFingerprints: []
+        )
+
+        precondition(state.observe(configuration: unconfigured) == .dismissTransientShield)
+        precondition(state.phase == .hidden)
+    }
+
+    private static func confirmedIntrusionRemainsAfterDisplayRemoval() {
+        var state = DisplayIntrusionAlertState()
+        _ = state.beginPotentialChange()
+        _ = state.observe(configuration: untrustedDisplayStatus())
+
+        precondition(state.observe(configuration: trustedDisplayStatus()) == .awaitAuthentication)
+        precondition(state.phase == .intrusion)
+    }
+
+    private static func connectedUntrustedDisplayCannotBeAuthenticatedAway() {
+        var state = DisplayIntrusionAlertState()
+        _ = state.observe(configuration: untrustedDisplayStatus())
+
+        precondition(!state.authenticate(configuration: untrustedDisplayStatus()))
+        precondition(state.phase == .intrusion)
+    }
+
+    private static func restoredDisplayConfigurationCanBeAuthenticated() {
+        var state = DisplayIntrusionAlertState()
+        _ = state.observe(configuration: untrustedDisplayStatus())
+        _ = state.observe(configuration: trustedDisplayStatus())
+
+        precondition(state.authenticate(configuration: trustedDisplayStatus()))
+        precondition(state.phase == .hidden)
+    }
+
+    private static func repeatedDisplayCallbacksDoNotRestartConfirmedIncident() {
+        var state = DisplayIntrusionAlertState()
+        _ = state.observe(configuration: untrustedDisplayStatus())
+
+        precondition(state.beginPotentialChange() == .none)
+        precondition(state.observe(configuration: untrustedDisplayStatus()) == .refreshIntrusion)
+        precondition(state.phase == .intrusion)
+    }
+
+    private static func trustedDisplayStatus() -> DisplayConfigurationStatus {
+        DisplayConfigurationStatus(
+            currentFingerprints: ["trusted-display"],
+            trustedFingerprints: ["trusted-display"]
+        )
+    }
+
+    private static func untrustedDisplayStatus() -> DisplayConfigurationStatus {
+        DisplayConfigurationStatus(
+            currentFingerprints: ["trusted-display", "unknown-display"],
+            trustedFingerprints: ["trusted-display"]
+        )
     }
 
     private static func thresholdTriggersOnlyOnceUntilRecovery() {
