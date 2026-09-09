@@ -24,7 +24,7 @@
 
 Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
 
-`MakLock-1.5.0-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
+`MakLock-1.5.1-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
 
 > The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
 
@@ -53,7 +53,8 @@ MakLock Secure is an independent maintenance release of [MakLock](https://github
 - Password input recovers keyboard focus after long idle periods, remote-session focus changes, or another window taking focus
 - Optional locking after every internet-connectivity probe fails continuously for 1, 2, or 5 minutes
 - Optional trusted-display protection: structural display changes immediately hide the desktop; a silent red full-screen warning, macOS notification, and red menu-bar shield remain active after an unauthorized configuration is confirmed
-- Optional owner-configured emergency restart recovery is stored only in the local Keychain; the alert exposes a normal restart control but never displays private recovery settings or progress
+- Brief structural display connections remain latched after the trusted setup returns, so a quick connect-and-disconnect still requires owner authentication and remains visible in the 12-hour security history; resolution-only changes are ignored
+- Optional owner-configured emergency restart recovery stays in local application state; the alert exposes a normal restart control but never displays private recovery settings or progress
 
 Network recovery never unlocks protected apps automatically. An unauthorized-display alert cannot be dismissed until the trusted display configuration returns and the user authenticates. Display fingerprints detect ordinary monitor additions and replacements, but passive splitters or hardware that perfectly clones a trusted display's EDID may not be distinguishable by macOS.
 
@@ -66,7 +67,7 @@ Network recovery never unlocks protected apps automatically. An unauthorized-dis
 
 Password lockout state is stored in the macOS Keychain and survives MakLock restarts and Mac reboots. Touch ID and Apple Watch remain available during a password-only lockout.
 
-Emergency restart recovery is disabled by default. Configure it only from the authenticated **Settings → Security → Emergency Display Recovery** section. It bypasses only the display-wide alert for the validated boot; protected apps remain closed and continue to require normal MakLock authentication.
+Emergency restart recovery is disabled by default. Configure it only from the authenticated **Settings → Security → Emergency Display Recovery** section. Its local state is synchronously persisted before a requested restart so application signature updates cannot block unattended startup. It bypasses only the display-wide alert for the validated boot; protected apps remain closed and continue to require normal MakLock authentication.
 
 ## Free and commercial options
 

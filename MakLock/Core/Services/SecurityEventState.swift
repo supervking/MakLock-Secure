@@ -127,6 +127,27 @@ struct DisplayConfigurationStatus: Equatable {
     }
 }
 
+struct DisplayStructuralTamperLatch: Equatable {
+    private(set) var hasPendingTamper = false
+
+    @discardableResult
+    mutating func observeStructuralChange() -> Bool {
+        let isFirstSignal = !hasPendingTamper
+        hasPendingTamper = true
+        return isFirstSignal
+    }
+
+    mutating func consume() -> Bool {
+        let detected = hasPendingTamper
+        hasPendingTamper = false
+        return detected
+    }
+
+    mutating func reset() {
+        hasPendingTamper = false
+    }
+}
+
 enum DisplayIntrusionAlertPhase: Equatable {
     case hidden
     case evaluating
@@ -174,6 +195,12 @@ struct DisplayIntrusionAlertState: Equatable {
             }
         }
 
+        let wasConfirmed = phase == .intrusion
+        phase = .intrusion
+        return wasConfirmed ? .refreshIntrusion : .confirmIntrusion
+    }
+
+    mutating func confirmStructuralTamper() -> DisplayIntrusionAlertTransition {
         let wasConfirmed = phase == .intrusion
         phase = .intrusion
         return wasConfirmed ? .refreshIntrusion : .confirmIntrusion

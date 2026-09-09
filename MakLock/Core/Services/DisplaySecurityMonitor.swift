@@ -31,12 +31,14 @@ final class DisplaySecurityMonitor {
     static let shared = DisplaySecurityMonitor()
 
     var onPotentialDisplayExposure: (() -> Void)?
+    var onStructuralDisplayTamper: ((DisplayConfigurationStatus) -> Void)?
     var onUntrustedDisplayChange: ((DisplayConfigurationStatus, Bool) -> Void)?
     var onTrustedDisplayConfiguration: ((DisplayConfigurationStatus) -> Void)?
 
     private var isStarted = false
     private var pendingEvaluation: DispatchWorkItem?
     private var trustTracker = DisplayTrustTracker()
+    private var structuralTamperLatch = DisplayStructuralTamperLatch()
     private var callbackContext: UnsafeMutableRawPointer?
 
     private init() {}
@@ -64,6 +66,7 @@ final class DisplaySecurityMonitor {
         callbackContext = context
         isStarted = true
         trustTracker.reset()
+        structuralTamperLatch.reset()
         evaluateCurrentDisplays()
         NSLog("[MakLock] Display security monitor started")
     }
@@ -79,6 +82,7 @@ final class DisplaySecurityMonitor {
         callbackContext = nil
         isStarted = false
         trustTracker.reset()
+        structuralTamperLatch.reset()
         NSLog("[MakLock] Display security monitor stopped")
     }
 
@@ -86,6 +90,7 @@ final class DisplaySecurityMonitor {
         let displays = Self.currentDisplays()
         Defaults.shared.trustedDisplayFingerprints = displays.map(\.fingerprint).sorted()
         trustTracker.reset()
+        structuralTamperLatch.reset()
         NSLog("[MakLock] Trusted display baseline updated (%d displays)", displays.count)
         if isStarted {
             evaluateCurrentDisplays()
@@ -108,6 +113,18 @@ final class DisplaySecurityMonitor {
             ]
             if !flags.intersection(exposureFlags).isEmpty {
                 self.onPotentialDisplayExposure?()
+            }
+
+            // Display sleep/wake can emit enabled/disabled flags, so only
+            // topology-changing add/remove and mirroring signals are latched.
+            let structuralTamperFlags: CGDisplayChangeSummaryFlags = [
+                .addFlag,
+                .removeFlag,
+                .mirrorFlag,
+                .unMirrorFlag
+            ]
+            if !flags.intersection(structuralTamperFlags).isEmpty {
+                self.structuralTamperLatch.observeStructuralChange()
             }
 
             self.pendingEvaluation?.cancel()
@@ -173,12 +190,18 @@ final class DisplaySecurityMonitor {
         guard Defaults.shared.lockOnDisplayChange else { return }
 
         let status = Self.currentConfigurationStatus()
+        let detectedStructuralTamper = structuralTamperLatch.consume()
         if status.isTrusted || !status.isConfigured {
             _ = trustTracker.observe(
                 current: status.currentFingerprints,
                 trusted: status.trustedFingerprints
             )
-            onTrustedDisplayConfiguration?(status)
+            if status.isConfigured, detectedStructuralTamper {
+                NSLog("[MakLock] Structural display tamper persisted after trusted recovery")
+                onStructuralDisplayTamper?(status)
+            } else {
+                onTrustedDisplayConfiguration?(status)
+            }
             return
         }
 

@@ -15,8 +15,12 @@ enum SecurityEventStateTests {
         returningToTrustedDisplayResetsMismatch()
         displayConfigurationCountsUnexpectedAndMissingDisplays()
         displayConfigurationCountsMissingTrustedDisplays()
+        structuralTamperSignalsAreCoalescedUntilEvaluation()
+        consumingStructuralTamperResetsTheLatch()
         potentialDisplayChangeShowsEvaluatingShield()
         trustedEvaluationDismissesTransientShield()
+        rapidDisplayConnectionRemainsAfterTrustedEvaluation()
+        repeatedStructuralTamperRefreshesConfirmedIncident()
         unconfiguredBaselineDismissesTransientShield()
         confirmedIntrusionRemainsAfterDisplayRemoval()
         connectedUntrustedDisplayCannotBeAuthenticatedAway()
@@ -124,6 +128,23 @@ enum SecurityEventStateTests {
         precondition(status.missingTrustedDisplayCount == 1)
     }
 
+    private static func structuralTamperSignalsAreCoalescedUntilEvaluation() {
+        var latch = DisplayStructuralTamperLatch()
+
+        precondition(latch.observeStructuralChange())
+        precondition(!latch.observeStructuralChange())
+        precondition(latch.hasPendingTamper)
+    }
+
+    private static func consumingStructuralTamperResetsTheLatch() {
+        var latch = DisplayStructuralTamperLatch()
+        _ = latch.observeStructuralChange()
+
+        precondition(latch.consume())
+        precondition(!latch.consume())
+        precondition(!latch.hasPendingTamper)
+    }
+
     private static func potentialDisplayChangeShowsEvaluatingShield() {
         var state = DisplayIntrusionAlertState()
 
@@ -137,6 +158,25 @@ enum SecurityEventStateTests {
 
         precondition(state.observe(configuration: trustedDisplayStatus()) == .dismissTransientShield)
         precondition(state.phase == .hidden)
+    }
+
+    private static func rapidDisplayConnectionRemainsAfterTrustedEvaluation() {
+        var state = DisplayIntrusionAlertState()
+        _ = state.beginPotentialChange()
+
+        precondition(state.confirmStructuralTamper() == .confirmIntrusion)
+        precondition(state.observe(configuration: trustedDisplayStatus()) == .awaitAuthentication)
+        precondition(state.phase == .intrusion)
+        precondition(state.authenticate(configuration: trustedDisplayStatus()))
+        precondition(state.phase == .hidden)
+    }
+
+    private static func repeatedStructuralTamperRefreshesConfirmedIncident() {
+        var state = DisplayIntrusionAlertState()
+
+        precondition(state.confirmStructuralTamper() == .confirmIntrusion)
+        precondition(state.confirmStructuralTamper() == .refreshIntrusion)
+        precondition(state.phase == .intrusion)
     }
 
     private static func unconfiguredBaselineDismissesTransientShield() {

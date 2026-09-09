@@ -22,6 +22,8 @@ final class Defaults {
         case passwordBruteForceProtectionEnabled
         case lastHandledBootIdentifier
         case securityEventRecords
+        case emergencyRestartConfiguration
+        case emergencyRestartState
     }
 
     private init() {}
@@ -139,5 +141,41 @@ final class Defaults {
             guard let data = try? encoder.encode(newValue) else { return }
             defaults.set(data, forKey: Key.securityEventRecords.rawValue)
         }
+    }
+
+    var emergencyRestartConfiguration: EmergencyRestartRecoveryConfiguration {
+        get {
+            guard let data = defaults.data(forKey: Key.emergencyRestartConfiguration.rawValue),
+                  let configuration = try? decoder.decode(
+                      EmergencyRestartRecoveryConfiguration.self,
+                      from: data
+                  ) else {
+                return EmergencyRestartRecoveryConfiguration()
+            }
+            return configuration.normalized
+        }
+        set {
+            guard let data = try? encoder.encode(newValue.normalized) else { return }
+            defaults.set(data, forKey: Key.emergencyRestartConfiguration.rawValue)
+        }
+    }
+
+    var emergencyRestartState: EmergencyRestartRecoveryState {
+        get {
+            guard let data = defaults.data(forKey: Key.emergencyRestartState.rawValue),
+                  let state = try? decoder.decode(EmergencyRestartRecoveryState.self, from: data) else {
+                return EmergencyRestartRecoveryState()
+            }
+            return state
+        }
+        set {
+            guard let data = try? encoder.encode(newValue) else { return }
+            defaults.set(data, forKey: Key.emergencyRestartState.rawValue)
+        }
+    }
+
+    @discardableResult
+    func synchronizeEmergencyRestartState() -> Bool {
+        defaults.synchronize()
     }
 }

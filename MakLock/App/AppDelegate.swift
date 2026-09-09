@@ -72,6 +72,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             DisplayIntrusionAlertService.shared.beginPotentialDisplayChange()
         }
 
+        DisplaySecurityMonitor.shared.onStructuralDisplayTamper = { status in
+            guard Defaults.shared.appSettings.isProtectionEnabled else { return }
+            EmergencyRestartRecoveryService.shared.invalidateRecoveryState()
+
+            if DisplayIntrusionAlertService.shared.isConfirmedIntrusion {
+                SecurityEventStore.shared.record(
+                    kind: .displayChange,
+                    action: .tamperDetected,
+                    succeeded: true,
+                    numericDetail: status.currentFingerprints.count
+                )
+                DisplayIntrusionAlertService.shared.confirmHistoricalTamper(
+                    configuration: status
+                )
+                Self.sendDisplayTamperNotification()
+                return
+            }
+
+            DisplayIntrusionAlertService.shared.confirmHistoricalTamper(
+                configuration: status
+            )
+            SecurityLockCoordinator.shared.lockProtectedApps(
+                reason: .displayChange,
+                numericDetail: status.currentFingerprints.count
+            )
+            Self.sendDisplayTamperNotification()
+        }
+
         DisplaySecurityMonitor.shared.onUntrustedDisplayChange = { status, isNewMismatch in
             guard Defaults.shared.appSettings.isProtectionEnabled else { return }
             EmergencyRestartRecoveryService.shared.processCurrentLaunch(
@@ -304,6 +332,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         sendNotification(
             title: title,
             body: body,
+            identifier: "maklock-display-intrusion",
+            interruptionLevel: .timeSensitive
+        )
+    }
+
+    static func sendDisplayTamperNotification() {
+        sendNotification(
+            title: String(localized: "Unauthorized Display Connection Recorded"),
+            body: String(localized: "An unauthorized display was connected and has been removed. Owner confirmation is required."),
             identifier: "maklock-display-intrusion",
             interruptionLevel: .timeSensitive
         )

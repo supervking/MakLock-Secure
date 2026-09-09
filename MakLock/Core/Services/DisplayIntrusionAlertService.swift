@@ -25,6 +25,10 @@ final class DisplayIntrusionAlertService {
         !windows.isEmpty
     }
 
+    var isConfirmedIntrusion: Bool {
+        state.phase == .intrusion
+    }
+
     func beginPotentialDisplayChange() {
         guard Defaults.shared.appSettings.isProtectionEnabled,
               Defaults.shared.lockOnDisplayChange,
@@ -34,6 +38,7 @@ final class DisplayIntrusionAlertService {
 
         model.phase = .evaluating
         model.configurationIsTrusted = false
+        model.detectedRemovedDisplayTamper = false
         model.errorMessage = nil
         refreshWindows()
         onAlertStateChanged?(true)
@@ -48,6 +53,9 @@ final class DisplayIntrusionAlertService {
         }
 
         updateModel(configuration: status)
+        if !status.isTrusted {
+            model.detectedRemovedDisplayTamper = false
+        }
 
         let transition = state.observe(configuration: status)
         model.phase = state.phase
@@ -84,11 +92,48 @@ final class DisplayIntrusionAlertService {
         }
     }
 
+    func confirmHistoricalTamper(configuration status: DisplayConfigurationStatus) {
+        guard Defaults.shared.appSettings.isProtectionEnabled,
+              Defaults.shared.lockOnDisplayChange else {
+            dismissForProtectionDisabled()
+            return
+        }
+
+        updateModel(configuration: status)
+        let transition = state.confirmStructuralTamper()
+        model.phase = state.phase
+        model.detectedRemovedDisplayTamper = true
+        model.errorMessage = nil
+        model.restartErrorMessage = nil
+
+        switch transition {
+        case .confirmIntrusion:
+            SecurityEventStore.shared.record(
+                kind: .displayChange,
+                action: .tamperDetected,
+                succeeded: true,
+                numericDetail: status.currentFingerprints.count
+            )
+        case .refreshIntrusion:
+            break
+        case .none,
+             .showEvaluatingShield,
+             .dismissTransientShield,
+             .awaitAuthentication:
+            assertionFailure("Unexpected display tamper transition")
+        }
+
+        refreshWindows()
+        onAlertStateChanged?(true)
+        NSLog("[MakLock] Historical display tamper alert confirmed")
+    }
+
     func dismissForProtectionDisabled() {
         guard isShowing || state.phase != .hidden else { return }
         state.reset()
         model.phase = .hidden
         model.errorMessage = nil
+        model.detectedRemovedDisplayTamper = false
         closeWindows()
         onAlertStateChanged?(false)
     }
@@ -98,6 +143,7 @@ final class DisplayIntrusionAlertService {
         state.reset()
         model.phase = .hidden
         model.errorMessage = nil
+        model.detectedRemovedDisplayTamper = false
         model.restartErrorMessage = nil
         model.isRestarting = false
         closeWindows()
@@ -273,6 +319,7 @@ final class DisplayIntrusionAlertService {
         )
         model.phase = .hidden
         model.errorMessage = nil
+        model.detectedRemovedDisplayTamper = false
         closeWindows()
         onAlertStateChanged?(false)
 
@@ -393,6 +440,7 @@ private final class DisplayIntrusionAlertModel: ObservableObject {
     @Published var isSystemAuthenticationInProgress = false
     @Published var isRestarting = false
     @Published var restartErrorMessage: String?
+    @Published var detectedRemovedDisplayTamper = false
 }
 
 private final class DisplayIntrusionAlertWindow: NSPanel {
@@ -467,7 +515,7 @@ private struct DisplayIntrusionAlertView: View {
                         .font(.title2.bold())
                         .foregroundColor(.white)
                 } else {
-                    Text("Unauthorized Display Detected")
+                    Text(alertTitle)
                         .font(.system(size: 34, weight: .bold))
                         .foregroundColor(.white)
 
@@ -572,9 +620,18 @@ private struct DisplayIntrusionAlertView: View {
     }
 
     private var primaryWarning: LocalizedStringKey {
-        model.unexpectedDisplayCount > 0
+        if model.detectedRemovedDisplayTamper {
+            return "An unauthorized display was connected and has been removed. Owner confirmation is required."
+        }
+        return model.unexpectedDisplayCount > 0
             ? "Illegal display connected. Disconnect it immediately."
             : "The trusted display setup changed. Check the display connection immediately."
+    }
+
+    private var alertTitle: LocalizedStringKey {
+        model.detectedRemovedDisplayTamper
+            ? "Unauthorized Display Connection Recorded"
+            : "Unauthorized Display Detected"
     }
 
     @State private var showRestartConfirmation = false

@@ -133,6 +133,10 @@ struct SecuritySettingsView: View {
                     Text("Adding, removing, mirroring, or replacing a display immediately hides the desktop and locks protected apps. The silent red alert remains until the trusted setup returns and you authenticate.")
                         .font(MakLockTypography.caption)
                         .foregroundColor(.secondary)
+
+                    Text("Even a brief display connection or disconnection remains locked and recorded after the trusted setup returns. Resolution-only changes are ignored.")
+                        .font(MakLockTypography.caption)
+                        .foregroundColor(.secondary)
                 }
             }
 
@@ -495,6 +499,8 @@ struct SecuritySettingsView: View {
             return String(localized: "Recovery activated")
         case .recoveryReset:
             return String(localized: "Recovery reset")
+        case .tamperDetected:
+            return String(localized: "Display tamper detected")
         }
     }
 }
