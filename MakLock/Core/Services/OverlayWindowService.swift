@@ -14,6 +14,7 @@ final class OverlayWindowService {
     private var isPasswordInputEnabled = false
     private var isTouchIDMode = false
     private var focusRecoveryGeneration = 0
+    private var didHideProtectedApplication = false
 
     /// Callback when overlay is dismissed after successful authentication.
     /// Passes the name of the unlocked app.
@@ -35,10 +36,7 @@ final class OverlayWindowService {
         guard overlayWindows.isEmpty else { return }
 
         currentApp = app
-
-        // Don't hide the protected app — the overlay blur covers its content,
-        // and hiding it causes macOS to reassign app focus, which interferes
-        // with the system Touch ID dialog.
+        didHideProtectedApplication = false
 
         createOverlayWindows(for: app)
 
@@ -65,9 +63,14 @@ final class OverlayWindowService {
         // Activate the protected app now that overlays are gone.
         // Small delay ensures overlay panels and Touch ID dialog are fully dismissed
         // before attempting to bring the app forward.
+        let shouldUnhideProtectedApplication = didHideProtectedApplication
+        didHideProtectedApplication = false
         if let bundleID = currentApp?.bundleIdentifier {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
-                self?.activateProtectedApp(bundleIdentifier: bundleID)
+                self?.activateProtectedApp(
+                    bundleIdentifier: bundleID,
+                    shouldUnhide: shouldUnhideProtectedApplication
+                )
             }
         }
 
@@ -113,6 +116,7 @@ final class OverlayWindowService {
         isPasswordInputEnabled = true
         isTouchIDMode = false
         setTouchIDMode(false)
+        hideProtectedApplicationForPasswordInput()
         for window in overlayWindows {
             window.setPasswordInputMode(true)
             window.orderFront(nil)
@@ -155,14 +159,8 @@ final class OverlayWindowService {
                 }
                 let succeeded = self.makePasswordWindowKeyAndFocusField()
 
-                if succeeded {
-                    self.focusRecoveryGeneration += 1
-                    completion(true)
-                    return
-                }
-
                 if index == delays.count - 1 {
-                    completion(false)
+                    completion(succeeded)
                 }
             }
         }
@@ -261,10 +259,33 @@ final class OverlayWindowService {
 
     /// Bring the protected app to the foreground after successful auth.
     /// Only activates if the app is already running — never launches a closed app.
-    private func activateProtectedApp(bundleIdentifier: String) {
+    private func hideProtectedApplicationForPasswordInput() {
+        guard !didHideProtectedApplication,
+              let bundleIdentifier = currentApp?.bundleIdentifier,
+              let application = NSWorkspace.shared.runningApplications.first(where: {
+                  $0.bundleIdentifier == bundleIdentifier
+              }),
+              !application.isHidden else {
+            return
+        }
+
+        didHideProtectedApplication = application.hide()
+        if didHideProtectedApplication {
+            NSLog("[MakLock] Protected app hidden while password overlay is active")
+        }
+    }
+
+    private func activateProtectedApp(
+        bundleIdentifier: String,
+        shouldUnhide: Bool
+    ) {
         guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == bundleIdentifier }) else {
             NSLog("[MakLock] App not running, skipping activation: %@", bundleIdentifier)
             return
+        }
+
+        if shouldUnhide {
+            app.unhide()
         }
         app.activate()
         NSLog("[MakLock] Activated app: %@", bundleIdentifier)

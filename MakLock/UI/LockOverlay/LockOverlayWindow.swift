@@ -1,13 +1,13 @@
 import AppKit
 
 /// Full-screen overlay panel that blocks interaction with a protected app.
-/// Uses NSPanel with .nonactivatingPanel so MakLock does NOT become the active app
-/// when the overlay is shown — this lets the system Touch ID dialog keep focus.
+/// It is created as a regular borderless panel so password mode can become the
+/// active key window. Touch ID mode keeps canBecomeKey disabled instead.
 final class LockOverlayWindow: NSPanel {
     init(for screen: NSScreen) {
         super.init(
             contentRect: screen.frame,
-            styleMask: [.borderless, .nonactivatingPanel],
+            styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
