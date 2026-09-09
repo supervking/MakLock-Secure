@@ -8,6 +8,8 @@ final class KeychainManager {
     private let service = "com.makmak.MakLock"
     private let account = "backup-password"
     private let passwordAttemptStateAccount = "password-attempt-state"
+    private let emergencyRestartConfigurationAccount = "emergency-restart-configuration"
+    private let emergencyRestartStateAccount = "emergency-restart-state"
 
     private init() {}
 
@@ -129,7 +131,100 @@ final class KeychainManager {
         return status == errSecSuccess || status == errSecItemNotFound
     }
 
+    @discardableResult
+    func saveEmergencyRestartConfiguration(
+        _ configuration: EmergencyRestartRecoveryConfiguration
+    ) -> Bool {
+        saveCodable(
+            configuration.normalized,
+            account: emergencyRestartConfigurationAccount
+        )
+    }
+
+    func loadEmergencyRestartConfiguration() -> EmergencyRestartRecoveryConfiguration? {
+        loadCodable(
+            EmergencyRestartRecoveryConfiguration.self,
+            account: emergencyRestartConfigurationAccount
+        )
+    }
+
+    @discardableResult
+    func saveEmergencyRestartState(_ state: EmergencyRestartRecoveryState) -> Bool {
+        saveCodable(state, account: emergencyRestartStateAccount)
+    }
+
+    func loadEmergencyRestartState() -> EmergencyRestartRecoveryState? {
+        loadCodable(
+            EmergencyRestartRecoveryState.self,
+            account: emergencyRestartStateAccount
+        )
+    }
+
+    @discardableResult
+    func deleteEmergencyRestartState() -> Bool {
+        deleteItem(account: emergencyRestartStateAccount)
+    }
+
     // MARK: - Private
+
+    private func saveCodable<Value: Encodable>(_ value: Value, account: String) -> Bool {
+        guard let data = try? JSONEncoder().encode(value) else { return false }
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        ]
+
+        let updateStatus = SecItemUpdate(
+            query as CFDictionary,
+            attributes as CFDictionary
+        )
+        if updateStatus == errSecSuccess {
+            return true
+        }
+        guard updateStatus == errSecItemNotFound else { return false }
+
+        var addQuery = query
+        attributes.forEach { addQuery[$0.key] = $0.value }
+        addQuery[kSecAttrSynchronizable as String] = false
+        return SecItemAdd(addQuery as CFDictionary, nil) == errSecSuccess
+    }
+
+    private func loadCodable<Value: Decodable>(
+        _ type: Value.Type,
+        account: String
+    ) -> Value? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(type, from: data)
+    }
+
+    private func deleteItem(account: String) -> Bool {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        let status = SecItemDelete(query as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
+    }
 
     private func retrievePassword() -> String? {
         let query: [String: Any] = [

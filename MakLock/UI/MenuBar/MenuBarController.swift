@@ -81,6 +81,7 @@ final class MenuBarController {
         Defaults.shared.appSettings = settings
 
         if !settings.isProtectionEnabled {
+            EmergencyRestartRecoveryService.shared.invalidateRecoveryState()
             DisplayIntrusionAlertService.shared.dismissForProtectionDisabled()
             OverlayWindowService.shared.dismissAll()
             iconState = .idle

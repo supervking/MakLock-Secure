@@ -72,9 +72,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             DisplayIntrusionAlertService.shared.beginPotentialDisplayChange()
         }
 
-        DisplaySecurityMonitor.shared.onUntrustedDisplayChange = { status in
+        DisplaySecurityMonitor.shared.onUntrustedDisplayChange = { status, isNewMismatch in
             guard Defaults.shared.appSettings.isProtectionEnabled else { return }
+            EmergencyRestartRecoveryService.shared.processCurrentLaunch(
+                configuration: status
+            )
+            if EmergencyRestartRecoveryService.shared.shouldSuppressDisplayAlert(
+                configuration: status
+            ) {
+                DisplayIntrusionAlertService.shared.dismissForEmergencyRecovery()
+                return
+            }
+
             DisplayIntrusionAlertService.shared.observe(configuration: status)
+            guard isNewMismatch else { return }
             SecurityLockCoordinator.shared.lockProtectedApps(
                 reason: .displayChange,
                 numericDetail: status.currentFingerprints.count
@@ -83,6 +94,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         DisplaySecurityMonitor.shared.onTrustedDisplayConfiguration = { status in
+            EmergencyRestartRecoveryService.shared.processCurrentLaunch(
+                configuration: status
+            )
+            EmergencyRestartRecoveryService.shared.invalidateForTrustedDisplayConfiguration()
             DisplayIntrusionAlertService.shared.observe(configuration: status)
         }
 

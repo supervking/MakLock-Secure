@@ -1,1 +1,2 @@
 "NSBluetoothAlwaysUsageDescription" = "MakLock 使用蓝牙检测附近的 Apple Watch，以实现接近解锁。";
+"NSAppleEventsUsageDescription" = "仅当你在未授权显示器警报中确认“重新启动电脑”时，MakLock 才会使用系统事件执行正常重启。";

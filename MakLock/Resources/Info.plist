@@ -6,6 +6,8 @@
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>MakLock uses Bluetooth to detect your Apple Watch for proximity unlock.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>MakLock uses System Events only when you confirm the Restart Mac button on an unauthorized display alert.</string>
 	<key>SUFeedURL</key>
 	<string>https://dutkiewiczmaciej.github.io/MakLock/appcast.xml</string>
 	<key>SUPublicEDKey</key>

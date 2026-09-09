@@ -17,6 +17,9 @@ struct SecuritySettingsView: View {
     @State private var showTrustDisplayConfirmation = false
     @State private var quitProtectedAppsAfterRestart = Defaults.shared.quitProtectedAppsAfterRestart
     @State private var passwordBruteForceProtectionEnabled = Defaults.shared.passwordBruteForceProtectionEnabled
+    @State private var emergencyRestartConfiguration = EmergencyRestartRecoveryService.shared.configuration
+    @State private var emergencyRestartConfigurationError: String?
+    @State private var isRestoringEmergencyRestartConfiguration = false
     @State private var recentSecurityEvents: [SecurityEventRecord] = []
 
     private static let eventDateFormatter: DateFormatter = {
@@ -105,6 +108,7 @@ struct SecuritySettingsView: View {
                         DisplaySecurityMonitor.shared.reloadSettings()
                         if !enabled {
                             DisplayIntrusionAlertService.shared.dismissForProtectionDisabled()
+                            emergencyRestartConfiguration.isEnabled = false
                         }
                     }
 
@@ -152,6 +156,62 @@ struct SecuritySettingsView: View {
                 Text("Five wrong passwords within 30 minutes block password unlock for 3 hours. Touch ID and Apple Watch remain available.")
                     .font(MakLockTypography.caption)
                     .foregroundColor(.secondary)
+            }
+
+            Section("Emergency Display Recovery") {
+                Toggle(
+                    "Enable hidden restart recovery",
+                    isOn: $emergencyRestartConfiguration.isEnabled
+                )
+                .toggleStyle(.goldSwitch)
+                .disabled(!lockOnDisplayChange)
+                .onChange(of: emergencyRestartConfiguration.isEnabled) { _ in
+                    guard !isRestoringEmergencyRestartConfiguration else { return }
+                    saveEmergencyRestartConfiguration()
+                }
+
+                if emergencyRestartConfiguration.isEnabled {
+                    Picker(
+                        "Required completed restarts",
+                        selection: $emergencyRestartConfiguration.requiredRestartCount
+                    ) {
+                        ForEach(3...9, id: \.self) { restartCount in
+                            Text(String.localizedStringWithFormat(
+                                NSLocalizedString("%lld restarts", comment: "Emergency restart count"),
+                                Int64(restartCount)
+                            ))
+                            .tag(restartCount)
+                        }
+                    }
+                    .onChange(of: emergencyRestartConfiguration.requiredRestartCount) { _ in
+                        guard !isRestoringEmergencyRestartConfiguration else { return }
+                        saveEmergencyRestartConfiguration()
+                    }
+
+                    Picker(
+                        "Completion window",
+                        selection: $emergencyRestartConfiguration.windowSeconds
+                    ) {
+                        ForEach([180, 300, 600, 900], id: \.self) { seconds in
+                            Text(networkDelayLabel(seconds: seconds))
+                                .tag(seconds)
+                        }
+                    }
+                    .onChange(of: emergencyRestartConfiguration.windowSeconds) { _ in
+                        guard !isRestoringEmergencyRestartConfiguration else { return }
+                        saveEmergencyRestartConfiguration()
+                    }
+                }
+
+                Text("Only real restarts requested from the unauthorized-display alert can advance recovery. The alert never shows the configured count, time window, or progress.")
+                    .font(MakLockTypography.caption)
+                    .foregroundColor(.secondary)
+
+                if let emergencyRestartConfigurationError {
+                    Text(emergencyRestartConfigurationError)
+                        .font(MakLockTypography.caption)
+                        .foregroundColor(MakLockColors.error)
+                }
             }
 
             Section("Recent Security Events — 12 Hours") {
@@ -219,6 +279,7 @@ struct SecuritySettingsView: View {
         .padding()
         .onAppear {
             hasBackupPassword = KeychainManager.shared.hasPassword()
+            emergencyRestartConfiguration = EmergencyRestartRecoveryService.shared.configuration
             refreshDisplayStatus()
             recentSecurityEvents = SecurityEventStore.shared.recentRecords()
         }
@@ -340,6 +401,27 @@ struct SecuritySettingsView: View {
         trustedDisplayCount = Defaults.shared.trustedDisplayFingerprints.count
     }
 
+    private func saveEmergencyRestartConfiguration() {
+        let requestedConfiguration = emergencyRestartConfiguration.normalized
+        guard requestedConfiguration != EmergencyRestartRecoveryService.shared.configuration else {
+            emergencyRestartConfigurationError = nil
+            return
+        }
+        if EmergencyRestartRecoveryService.shared.updateConfiguration(requestedConfiguration) {
+            emergencyRestartConfiguration = EmergencyRestartRecoveryService.shared.configuration
+            emergencyRestartConfigurationError = nil
+        } else {
+            isRestoringEmergencyRestartConfiguration = true
+            emergencyRestartConfiguration = EmergencyRestartRecoveryService.shared.configuration
+            emergencyRestartConfigurationError = String(
+                localized: "Failed to save emergency restart recovery settings."
+            )
+            DispatchQueue.main.async {
+                isRestoringEmergencyRestartConfiguration = false
+            }
+        }
+    }
+
     private func eventTitle(_ kind: SecurityEventKind) -> LocalizedStringKey {
         switch kind {
         case .protectedAppActivation:
@@ -364,6 +446,8 @@ struct SecuritySettingsView: View {
             return "Blocked password attempt"
         case .sessionFocusRecovery:
             return "Password focus restored"
+        case .emergencyRestartRecovery:
+            return "Emergency restart recovery"
         }
     }
 
@@ -401,6 +485,16 @@ struct SecuritySettingsView: View {
             return String(localized: "Password blocked")
         case .focusRestored:
             return String(localized: "Focus restored")
+        case .restartRequested:
+            return String(localized: "Restart requested")
+        case .restartFailed:
+            return String(localized: "Restart failed")
+        case .recoveryProgressed:
+            return String(localized: "Recovery progressed")
+        case .recoveryActivated:
+            return String(localized: "Recovery activated")
+        case .recoveryReset:
+            return String(localized: "Recovery reset")
         }
     }
 }

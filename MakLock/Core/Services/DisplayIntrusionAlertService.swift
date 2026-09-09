@@ -93,6 +93,74 @@ final class DisplayIntrusionAlertService {
         onAlertStateChanged?(false)
     }
 
+    func dismissForEmergencyRecovery() {
+        guard isShowing || state.phase != .hidden else { return }
+        state.reset()
+        model.phase = .hidden
+        model.errorMessage = nil
+        model.restartErrorMessage = nil
+        model.isRestarting = false
+        closeWindows()
+        onAlertStateChanged?(false)
+        NSLog("[MakLock] Display alert suppressed by emergency restart recovery")
+    }
+
+    func requestSystemRestart() {
+        guard state.phase == .intrusion, !model.isRestarting else { return }
+
+        let status = DisplaySecurityMonitor.currentConfigurationStatus()
+        guard status.isConfigured, !status.isTrusted else {
+            model.restartErrorMessage = String(
+                localized: "Restart is available only while an unauthorized display alert is active."
+            )
+            return
+        }
+
+        model.isRestarting = true
+        model.restartErrorMessage = nil
+        let recoveryService = EmergencyRestartRecoveryService.shared
+        let recoveryWasEnabled = recoveryService.isRecoveryEnabled
+        let recoveryWasPrepared = recoveryService.prepareAlertRestart(
+            configuration: status
+        )
+        guard !recoveryWasEnabled || recoveryWasPrepared else {
+            model.isRestarting = false
+            model.restartErrorMessage = String(
+                localized: "Secure restart recovery state could not be saved. Contact the computer owner."
+            )
+            return
+        }
+        let requestedFromBootIdentifier = SystemBootIdentity.current
+        setRestartRequestMode(true)
+
+        SystemRestartService.shared.requestRestart { [weak self] accepted in
+            guard let self else { return }
+            guard accepted else {
+                EmergencyRestartRecoveryService.shared.cancelPendingRestart()
+                self.model.isRestarting = false
+                self.model.restartErrorMessage = String(
+                    localized: "The restart request failed. Contact the computer owner."
+                )
+                self.setRestartRequestMode(false)
+                return
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 60) { [weak self] in
+                guard let self,
+                      self.model.isRestarting,
+                      SystemBootIdentity.current == requestedFromBootIdentifier else {
+                    return
+                }
+                EmergencyRestartRecoveryService.shared.cancelPendingRestart()
+                self.model.isRestarting = false
+                self.model.restartErrorMessage = String(
+                    localized: "The restart did not begin. Contact the computer owner."
+                )
+                self.setRestartRequestMode(false)
+            }
+        }
+    }
+
     func authenticateWithPassword(_ password: String) -> AuthResult {
         let status = DisplaySecurityMonitor.currentConfigurationStatus()
         guard status.isTrusted else {
@@ -293,6 +361,13 @@ final class DisplayIntrusionAlertService {
         }
     }
 
+    private func setRestartRequestMode(_ active: Bool) {
+        windows.forEach { $0.setRestartRequestMode(active) }
+        if !active {
+            bringAlertWindowsForward()
+        }
+    }
+
     private func closeWindows(resetFocusGeneration: Bool = true) {
         if resetFocusGeneration {
             focusRecoveryGeneration += 1
@@ -316,6 +391,8 @@ private final class DisplayIntrusionAlertModel: ObservableObject {
     @Published var missingTrustedDisplayCount = 0
     @Published var errorMessage: String?
     @Published var isSystemAuthenticationInProgress = false
+    @Published var isRestarting = false
+    @Published var restartErrorMessage: String?
 }
 
 private final class DisplayIntrusionAlertWindow: NSPanel {
@@ -352,6 +429,11 @@ private final class DisplayIntrusionAlertWindow: NSPanel {
     func setSystemAuthenticationMode(_ active: Bool) {
         level = active ? .screenSaver : Self.alertLevel
         ignoresMouseEvents = active
+    }
+
+    func setRestartRequestMode(_ active: Bool) {
+        level = active ? .screenSaver : Self.alertLevel
+        ignoresMouseEvents = false
     }
 
     private static let alertLevel = NSWindow.Level(
@@ -402,11 +484,42 @@ private struct DisplayIntrusionAlertView: View {
                         .foregroundColor(.white.opacity(0.85))
 
                     authenticationContent
+                    restartControl
                 }
             }
             .multilineTextAlignment(.center)
             .padding(48)
             .frame(maxWidth: 780)
+        }
+    }
+
+    @ViewBuilder
+    private var restartControl: some View {
+        if model.phase == .intrusion, !model.configurationIsTrusted {
+            VStack(spacing: 10) {
+                Button(model.isRestarting ? "Restarting..." : "Restart Mac") {
+                    showRestartConfirmation = true
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.white)
+                .foregroundColor(.red)
+                .disabled(model.isRestarting)
+
+                if let restartErrorMessage = model.restartErrorMessage {
+                    Text(restartErrorMessage)
+                        .font(.headline)
+                        .foregroundColor(.yellow)
+                }
+            }
+            .padding(.top, 10)
+            .alert("Restart Mac?", isPresented: $showRestartConfirmation) {
+                Button("Restart", role: .destructive) {
+                    DisplayIntrusionAlertService.shared.requestSystemRestart()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Restarting closes all applications. Unsaved work may be lost.")
+            }
         }
     }
 
@@ -463,6 +576,8 @@ private struct DisplayIntrusionAlertView: View {
             ? "Illegal display connected. Disconnect it immediately."
             : "The trusted display setup changed. Check the display connection immediately."
     }
+
+    @State private var showRestartConfirmation = false
 }
 
 private struct DisplayIntrusionPasswordView: View {
