@@ -204,6 +204,10 @@
 "The restart request failed. Contact the computer owner." = "The restart request failed. Contact the computer owner.";
 "The restart did not begin. Contact the computer owner." = "The restart did not begin. Contact the computer owner.";
 "Secure restart recovery state could not be saved. Contact the computer owner." = "Secure restart recovery state could not be saved. Contact the computer owner.";
+"Unauthorized Display Connection Recorded" = "Unauthorized Display Connection Recorded";
+"An unauthorized display was connected and has been removed. Owner confirmation is required." = "An unauthorized display was connected and has been removed. Owner confirmation is required.";
+"Display tamper detected" = "Display tamper detected";
+"Even a brief display connection or disconnection remains locked and recorded after the trusted setup returns. Resolution-only changes are ignored." = "Even a brief display connection or disconnection remains locked and recorded after the trusted setup returns. Resolution-only changes are ignored.";
 "Emergency Display Recovery" = "Emergency Display Recovery";
 "Enable hidden restart recovery" = "Enable hidden restart recovery";
 "Required completed restarts" = "Required completed restarts";

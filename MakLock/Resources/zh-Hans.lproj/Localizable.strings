@@ -204,6 +204,10 @@
 "The restart request failed. Contact the computer owner." = "重新启动请求失败，请联系电脑所有者。";
 "The restart did not begin. Contact the computer owner." = "电脑未开始重新启动，请联系电脑所有者。";
 "Secure restart recovery state could not be saved. Contact the computer owner." = "无法保存安全重启恢复状态，请联系电脑所有者。";
+"Unauthorized Display Connection Recorded" = "检测到未授权显示器接入记录";
+"An unauthorized display was connected and has been removed. Owner confirmation is required." = "检测到未授权显示器曾接入，当前已拔出，请电脑所有者确认。";
+"Display tamper detected" = "检测到显示器防篡改事件";
+"Even a brief display connection or disconnection remains locked and recorded after the trusted setup returns. Resolution-only changes are ignored." = "即使显示器只是短暂接入或拔出，在可信配置恢复后仍会保持锁定并留下记录；仅分辨率变化不会触发。";
 "Emergency Display Recovery" = "显示器应急恢复";
 "Enable hidden restart recovery" = "启用隐藏重启恢复";
 "Required completed restarts" = "所需有效重启次数";

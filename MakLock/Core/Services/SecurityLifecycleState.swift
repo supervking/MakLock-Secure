@@ -374,6 +374,7 @@ enum SecurityEventAction: String, Codable {
     case recoveryProgressed
     case recoveryActivated
     case recoveryReset
+    case tamperDetected
 }
 
 struct SecurityEventRecord: Codable, Identifiable, Equatable {

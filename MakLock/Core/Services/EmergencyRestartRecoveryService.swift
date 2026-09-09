@@ -11,11 +11,9 @@ final class EmergencyRestartRecoveryService {
 
     private init() {
         configuration = (
-            KeychainManager.shared.loadEmergencyRestartConfiguration()
-                ?? EmergencyRestartRecoveryConfiguration()
+            Defaults.shared.emergencyRestartConfiguration
         ).normalized
-        state = KeychainManager.shared.loadEmergencyRestartState()
-            ?? EmergencyRestartRecoveryState()
+        state = Defaults.shared.emergencyRestartState
         NSLog(
             "[MakLock] Emergency restart recovery configuration: %@",
             configuration.isEnabled ? "enabled" : "disabled"
@@ -27,7 +25,9 @@ final class EmergencyRestartRecoveryService {
         _ configuration: EmergencyRestartRecoveryConfiguration
     ) -> Bool {
         let normalized = configuration.normalized
-        guard KeychainManager.shared.saveEmergencyRestartConfiguration(normalized) else {
+        Defaults.shared.emergencyRestartConfiguration = normalized
+        guard Defaults.shared.synchronizeEmergencyRestartState(),
+              Defaults.shared.emergencyRestartConfiguration == normalized else {
             NSLog("[MakLock] Failed to save emergency restart recovery configuration")
             return false
         }
@@ -208,7 +208,9 @@ final class EmergencyRestartRecoveryService {
 
     @discardableResult
     private func persistState() -> Bool {
-        let saved = KeychainManager.shared.saveEmergencyRestartState(state)
+        Defaults.shared.emergencyRestartState = state
+        let saved = Defaults.shared.synchronizeEmergencyRestartState()
+            && Defaults.shared.emergencyRestartState == state
         if !saved {
             NSLog("[MakLock] Failed to save emergency restart recovery state")
         }
