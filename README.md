@@ -24,7 +24,7 @@
 
 Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
 
-`MakLock-1.3.0-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
+`MakLock-1.3.1-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
 
 > The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
 
@@ -58,6 +58,7 @@ Network recovery never unlocks protected apps automatically. Display fingerprint
 
 - Optional restart cleanup closes automatically restored protected apps during a one-time 90-second window after a real Mac reboot; remote-access and system apps are always excluded
 - Password focus is restored after the macOS user session becomes active or screens wake, so remote users can type without clicking the password field
+- Password entry uses a native AppKit secure field and verifies the actual first responder instead of relying only on SwiftUI focus state
 - Progressive password protection applies 2-second, 4-second, 30-second, and 5-minute delays, then blocks password unlock for 3 hours after five failures within 30 minutes
 - Security history stores only non-sensitive events from the latest 12 hours, capped at 200 records
 

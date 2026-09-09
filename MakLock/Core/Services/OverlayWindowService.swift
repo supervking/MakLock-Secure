@@ -13,6 +13,7 @@ final class OverlayWindowService {
     private var currentApp: ProtectedApp?
     private var isPasswordInputEnabled = false
     private var isTouchIDMode = false
+    private var focusRecoveryGeneration = 0
 
     /// Callback when overlay is dismissed after successful authentication.
     /// Passes the name of the unlocked app.
@@ -58,6 +59,8 @@ final class OverlayWindowService {
         overlayWindows.removeAll()
         isPasswordInputEnabled = false
         isTouchIDMode = false
+        focusRecoveryGeneration += 1
+        PasswordFieldFocusCoordinator.shared.clear()
 
         // Activate the protected app now that overlays are gone.
         // Small delay ensures overlay panels and Touch ID dialog are fully dismissed
@@ -98,6 +101,7 @@ final class OverlayWindowService {
         isTouchIDMode = active
         if active {
             isPasswordInputEnabled = false
+            focusRecoveryGeneration += 1
         }
         for window in overlayWindows {
             window.ignoresMouseEvents = active
@@ -114,11 +118,16 @@ final class OverlayWindowService {
             window.orderFront(nil)
         }
 
-        makePasswordWindowKeyAndRequestFocus()
+        _ = makePasswordWindowKeyAndFocusField()
+        DispatchQueue.main.async { [weak self] in
+            _ = self?.makePasswordWindowKeyAndFocusField()
+        }
     }
 
     func disableKeyboardInput() {
         isPasswordInputEnabled = false
+        focusRecoveryGeneration += 1
+        PasswordFieldFocusCoordinator.shared.clear()
         for window in overlayWindows {
             window.setPasswordInputMode(false)
         }
@@ -132,34 +141,42 @@ final class OverlayWindowService {
             return false
         }
 
-        let delays = [0.0, 0.4, 1.2, 2.5, 4.0]
+        focusRecoveryGeneration += 1
+        let generation = focusRecoveryGeneration
+        let delays = [0.0, 0.5, 1.5, 3.0, 5.0]
         for (index, delay) in delays.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                guard let self, self.isShowing, self.isPasswordInputEnabled, !self.isTouchIDMode else {
+                guard let self,
+                      generation == self.focusRecoveryGeneration,
+                      self.isShowing,
+                      self.isPasswordInputEnabled,
+                      !self.isTouchIDMode else {
                     return
                 }
-                self.makePasswordWindowKeyAndRequestFocus()
+                let succeeded = self.makePasswordWindowKeyAndFocusField()
+
+                if succeeded {
+                    self.focusRecoveryGeneration += 1
+                    completion(true)
+                    return
+                }
 
                 if index == delays.count - 1 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
-                        completion(self?.primaryOverlayWindow()?.isKeyWindow == true)
-                    }
+                    completion(false)
                 }
             }
         }
         return true
     }
 
-    private func makePasswordWindowKeyAndRequestFocus() {
-        guard isShowing, isPasswordInputEnabled, !isTouchIDMode else { return }
+    private func makePasswordWindowKeyAndFocusField() -> Bool {
+        guard isShowing, isPasswordInputEnabled, !isTouchIDMode else { return false }
 
         let primaryWindow = primaryOverlayWindow()
 
         NSApp.activate(ignoringOtherApps: true)
-        DispatchQueue.main.async {
-            primaryWindow?.makeKeyAndOrderFront(nil)
-            NotificationCenter.default.post(name: .makLockPasswordFocusRequested, object: nil)
-        }
+        primaryWindow?.makeKeyAndOrderFront(nil)
+        return PasswordFieldFocusCoordinator.shared.focusPrimaryField()
     }
 
     private func primaryOverlayWindow() -> LockOverlayWindow? {
@@ -253,10 +270,4 @@ final class OverlayWindowService {
         NSLog("[MakLock] Activated app: %@", bundleIdentifier)
     }
 
-}
-
-extension Notification.Name {
-    static let makLockPasswordFocusRequested = Notification.Name(
-        "com.makmak.MakLock.passwordFocusRequested"
-    )
 }

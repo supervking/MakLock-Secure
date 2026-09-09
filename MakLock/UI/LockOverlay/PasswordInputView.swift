@@ -8,7 +8,6 @@ struct PasswordInputView: View {
     @State private var errorMessage: String?
     @State private var shakeOffset: CGFloat = 0
     @State private var passwordAccessDecision: PasswordAccessDecision = .allowed
-    @FocusState private var passwordFieldFocused: Bool
 
     private let accessRefreshTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -23,18 +22,14 @@ struct PasswordInputView: View {
                 .font(MakLockTypography.title)
                 .foregroundColor(MakLockColors.textPrimary)
 
-            SecureField("Password", text: $password)
-                .textFieldStyle(.roundedBorder)
-                .frame(width: 240)
-                .focused($passwordFieldFocused)
-                .submitLabel(.done)
-                .onSubmit { verifyPassword() }
-                .disabled(isPasswordInputBlocked)
-                .simultaneousGesture(
-                    TapGesture().onEnded {
-                        focusPasswordField()
-                    }
-                )
+            FocusableSecureField(
+                text: $password,
+                placeholder: String(localized: "Password"),
+                isEnabled: !isPasswordInputBlocked,
+                onSubmit: verifyPassword,
+                onInteraction: focusPasswordField
+            )
+                .frame(width: 240, height: 24)
                 .offset(x: shakeOffset)
 
             if let visibleErrorMessage {
@@ -72,9 +67,6 @@ struct PasswordInputView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             focusPasswordField()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .makLockPasswordFocusRequested)) { _ in
-            applyPasswordFieldFocus()
         }
         .onReceive(accessRefreshTimer) { _ in
             refreshPasswordAccessDecision()
@@ -119,22 +111,9 @@ struct PasswordInputView: View {
 
     private func focusPasswordField() {
         guard !isPasswordInputBlocked else {
-            passwordFieldFocused = false
             return
         }
         OverlayWindowService.shared.enableKeyboardInput()
-        applyPasswordFieldFocus()
-    }
-
-    private func applyPasswordFieldFocus() {
-        guard !isPasswordInputBlocked else {
-            passwordFieldFocused = false
-            return
-        }
-        passwordFieldFocused = false
-        DispatchQueue.main.async {
-            passwordFieldFocused = true
-        }
     }
 
     private var isPasswordInputBlocked: Bool {
