@@ -31,7 +31,7 @@ final class DisplaySecurityMonitor {
     static let shared = DisplaySecurityMonitor()
 
     var onPotentialDisplayExposure: (() -> Void)?
-    var onUntrustedDisplayChange: ((DisplayConfigurationStatus) -> Void)?
+    var onUntrustedDisplayChange: ((DisplayConfigurationStatus, Bool) -> Void)?
     var onTrustedDisplayConfiguration: ((DisplayConfigurationStatus) -> Void)?
 
     private var isStarted = false
@@ -182,13 +182,15 @@ final class DisplaySecurityMonitor {
             return
         }
 
-        guard trustTracker.observe(
+        let isNewMismatch = trustTracker.observe(
             current: status.currentFingerprints,
             trusted: status.trustedFingerprints
-        ) else { return }
+        )
 
-        NSLog("[MakLock] Untrusted display configuration detected")
-        onUntrustedDisplayChange?(status)
+        if isNewMismatch {
+            NSLog("[MakLock] Untrusted display configuration detected")
+        }
+        onUntrustedDisplayChange?(status, isNewMismatch)
     }
 
     private static func screenName(for displayID: CGDirectDisplayID) -> String {

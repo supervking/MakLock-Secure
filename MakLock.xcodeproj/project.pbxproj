@@ -66,6 +66,7 @@
 		A10000000000000000001506 /* SessionFocusService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001516 /* SessionFocusService.swift */; };
 		A10000000000000000001701 /* FocusableSecureField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001711 /* FocusableSecureField.swift */; };
 		A10000000000000000001901 /* DisplayIntrusionAlertService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001911 /* DisplayIntrusionAlertService.swift */; };
+		A10000000000000000001A01 /* EmergencyRestartRecoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000001A11 /* EmergencyRestartRecoveryService.swift */; };
 		A10000000000000000001203 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000001202 /* Sparkle */; };
 /* End PBXBuildFile section */
 
@@ -130,6 +131,7 @@
 		A10000000000000000001516 /* SessionFocusService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionFocusService.swift; sourceTree = "<group>"; };
 		A10000000000000000001711 /* FocusableSecureField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusableSecureField.swift; sourceTree = "<group>"; };
 		A10000000000000000001911 /* DisplayIntrusionAlertService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayIntrusionAlertService.swift; sourceTree = "<group>"; };
+		A10000000000000000001A11 /* EmergencyRestartRecoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyRestartRecoveryService.swift; sourceTree = "<group>"; };
 		B10000000000000000000003 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B10000000000000000000004 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		B10000000000000000000006 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -224,6 +226,7 @@
 				A10000000000000000001313 /* NetworkSecurityMonitor.swift */,
 				A10000000000000000001314 /* DisplaySecurityMonitor.swift */,
 				A10000000000000000001911 /* DisplayIntrusionAlertService.swift */,
+				A10000000000000000001A11 /* EmergencyRestartRecoveryService.swift */,
 				A10000000000000000001511 /* SecurityLifecycleState.swift */,
 				A10000000000000000001512 /* PasswordAttemptLimiter.swift */,
 				A10000000000000000001513 /* SecurityEventStore.swift */,
@@ -500,6 +503,7 @@
 				A10000000000000000001303 /* NetworkSecurityMonitor.swift in Sources */,
 				A10000000000000000001304 /* DisplaySecurityMonitor.swift in Sources */,
 				A10000000000000000001901 /* DisplayIntrusionAlertService.swift in Sources */,
+				A10000000000000000001A01 /* EmergencyRestartRecoveryService.swift in Sources */,
 				A10000000000000000001501 /* SecurityLifecycleState.swift in Sources */,
 				A10000000000000000001502 /* PasswordAttemptLimiter.swift in Sources */,
 				A10000000000000000001503 /* SecurityEventStore.swift in Sources */,
@@ -637,7 +641,7 @@
 				CODE_SIGN_ENTITLEMENTS = MakLock/Resources/MakLock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MakLock/Resources/Info.plist;
@@ -647,7 +651,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.makmak.MakLock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = NO;
@@ -664,7 +668,7 @@
 				CODE_SIGN_ENTITLEMENTS = MakLock/Resources/MakLock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MakLock/Resources/Info.plist;
@@ -674,7 +678,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.makmak.MakLock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = YES;

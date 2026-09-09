@@ -129,6 +129,211 @@ struct BootCleanupTracker: Equatable {
     }
 }
 
+struct EmergencyRestartRecoveryConfiguration: Codable, Equatable {
+    static let defaultRestartCount = 5
+    static let defaultWindowSeconds = 5 * 60
+
+    var isEnabled = false
+    var requiredRestartCount = defaultRestartCount
+    var windowSeconds = defaultWindowSeconds
+
+    var normalized: EmergencyRestartRecoveryConfiguration {
+        EmergencyRestartRecoveryConfiguration(
+            isEnabled: isEnabled,
+            requiredRestartCount: min(9, max(3, requiredRestartCount)),
+            windowSeconds: min(15 * 60, max(3 * 60, windowSeconds))
+        )
+    }
+}
+
+enum EmergencyRestartLaunchOutcome: Equatable {
+    case idle
+    case waitingForRestart
+    case reset
+    case progressed(completed: Int, remaining: Int)
+    case activated
+    case bypassActive
+}
+
+struct EmergencyRestartRecoveryState: Codable, Equatable {
+    private(set) var sequenceStartedAt: TimeInterval?
+    private(set) var completedRestartCount = 0
+    private(set) var pendingRestartBootIdentifier: String?
+    private(set) var pendingRestartRequestedAt: TimeInterval?
+    private(set) var sequenceDisplayDigest: String?
+    private(set) var bypassBootIdentifier: String?
+    private(set) var bypassDisplayDigest: String?
+
+    mutating func prepareRestart(
+        now: TimeInterval,
+        currentBootIdentifier: String,
+        displayDigest: String,
+        isUntrustedDisplayConfiguration: Bool,
+        configuration: EmergencyRestartRecoveryConfiguration
+    ) -> Bool {
+        let configuration = configuration.normalized
+        guard configuration.isEnabled,
+              isUntrustedDisplayConfiguration,
+              !displayDigest.isEmpty else {
+            return false
+        }
+
+        if !isSequenceValid(
+            now: now,
+            displayDigest: displayDigest,
+            configuration: configuration
+        ) {
+            resetSequence()
+            sequenceStartedAt = now
+            sequenceDisplayDigest = displayDigest
+        }
+
+        pendingRestartBootIdentifier = currentBootIdentifier
+        pendingRestartRequestedAt = now
+        return true
+    }
+
+    mutating func cancelPendingRestart(currentBootIdentifier: String) {
+        guard pendingRestartBootIdentifier == currentBootIdentifier else { return }
+        pendingRestartBootIdentifier = nil
+        pendingRestartRequestedAt = nil
+    }
+
+    mutating func processLaunch(
+        now: TimeInterval,
+        currentBootIdentifier: String,
+        currentBootStartedAt: TimeInterval,
+        displayDigest: String,
+        isUntrustedDisplayConfiguration: Bool,
+        configuration: EmergencyRestartRecoveryConfiguration
+    ) -> EmergencyRestartLaunchOutcome {
+        let configuration = configuration.normalized
+        let hadRecoveryState = hasRecoveryState
+
+        guard configuration.isEnabled,
+              isUntrustedDisplayConfiguration,
+              !displayDigest.isEmpty else {
+            invalidate()
+            return hadRecoveryState ? .reset : .idle
+        }
+
+        if isBypassActive(
+            currentBootIdentifier: currentBootIdentifier,
+            displayDigest: displayDigest,
+            isUntrustedDisplayConfiguration: true
+        ) {
+            return .bypassActive
+        }
+
+        guard let pendingBootIdentifier = pendingRestartBootIdentifier,
+              let requestedAt = pendingRestartRequestedAt,
+              let startedAt = sequenceStartedAt,
+              let expectedDisplayDigest = sequenceDisplayDigest else {
+            if sequenceStartedAt != nil,
+               !isSequenceValid(
+                   now: now,
+                   displayDigest: displayDigest,
+                   configuration: configuration
+               ) {
+                resetSequence()
+                return .reset
+            }
+            return .idle
+        }
+
+        guard pendingBootIdentifier != currentBootIdentifier else {
+            return .waitingForRestart
+        }
+
+        let restartBeganPromptly = currentBootStartedAt >= requestedAt - 5
+            && currentBootStartedAt <= requestedAt + 60
+        let completedInsideWindow = now >= startedAt
+            && now - startedAt <= TimeInterval(configuration.windowSeconds)
+        let requestPrecedesLaunch = now >= requestedAt
+        let displayMatches = displayDigest == expectedDisplayDigest
+
+        guard restartBeganPromptly,
+              completedInsideWindow,
+              requestPrecedesLaunch,
+              displayMatches else {
+            resetSequence()
+            return .reset
+        }
+
+        completedRestartCount += 1
+        pendingRestartBootIdentifier = nil
+        pendingRestartRequestedAt = nil
+
+        if completedRestartCount >= configuration.requiredRestartCount {
+            bypassBootIdentifier = currentBootIdentifier
+            bypassDisplayDigest = displayDigest
+            resetSequence()
+            return .activated
+        }
+
+        return .progressed(
+            completed: completedRestartCount,
+            remaining: configuration.requiredRestartCount - completedRestartCount
+        )
+    }
+
+    mutating func isBypassActive(
+        currentBootIdentifier: String,
+        displayDigest: String,
+        isUntrustedDisplayConfiguration: Bool
+    ) -> Bool {
+        guard let bypassBootIdentifier,
+              let bypassDisplayDigest else {
+            return false
+        }
+
+        guard isUntrustedDisplayConfiguration,
+              bypassBootIdentifier == currentBootIdentifier,
+              bypassDisplayDigest == displayDigest else {
+            self.bypassBootIdentifier = nil
+            self.bypassDisplayDigest = nil
+            return false
+        }
+
+        return true
+    }
+
+    mutating func invalidate() {
+        resetSequence()
+        bypassBootIdentifier = nil
+        bypassDisplayDigest = nil
+    }
+
+    private var hasRecoveryState: Bool {
+        sequenceStartedAt != nil
+            || pendingRestartBootIdentifier != nil
+            || bypassBootIdentifier != nil
+    }
+
+    private func isSequenceValid(
+        now: TimeInterval,
+        displayDigest: String,
+        configuration: EmergencyRestartRecoveryConfiguration
+    ) -> Bool {
+        guard let sequenceStartedAt,
+              let sequenceDisplayDigest,
+              now >= sequenceStartedAt,
+              now - sequenceStartedAt <= TimeInterval(configuration.windowSeconds),
+              sequenceDisplayDigest == displayDigest else {
+            return false
+        }
+        return true
+    }
+
+    private mutating func resetSequence() {
+        sequenceStartedAt = nil
+        completedRestartCount = 0
+        pendingRestartBootIdentifier = nil
+        pendingRestartRequestedAt = nil
+        sequenceDisplayDigest = nil
+    }
+}
+
 enum BootCleanupPolicy {
     static func shouldTerminate(
         bundleIdentifier: String,
@@ -152,6 +357,7 @@ enum SecurityEventKind: String, Codable {
     case passwordLockout
     case blockedPasswordAttempt
     case sessionFocusRecovery
+    case emergencyRestartRecovery
 }
 
 enum SecurityEventAction: String, Codable {
@@ -163,6 +369,11 @@ enum SecurityEventAction: String, Codable {
     case retryDelayed
     case passwordBlocked
     case focusRestored
+    case restartRequested
+    case restartFailed
+    case recoveryProgressed
+    case recoveryActivated
+    case recoveryReset
 }
 
 struct SecurityEventRecord: Codable, Identifiable, Equatable {

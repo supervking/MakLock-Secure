@@ -83,6 +83,21 @@ final class OverlayWindowService {
         hide()
     }
 
+    /// Remove overlays during emergency restart cleanup without authenticating,
+    /// activating, or unhiding the protected application.
+    func dismissWithoutAuthentication() {
+        AuthenticationService.shared.cancelAuthentication()
+        overlayWindows.forEach { $0.close() }
+        overlayWindows.removeAll()
+        isPasswordInputEnabled = false
+        isTouchIDMode = false
+        focusRecoveryGeneration += 1
+        PasswordFieldFocusCoordinator.shared.clear()
+        didHideProtectedApplication = false
+        currentApp = nil
+        NSLog("[MakLock] Overlay dismissed without authentication for emergency cleanup")
+    }
+
     /// Whether an overlay is currently displayed.
     var isShowing: Bool {
         !overlayWindows.isEmpty

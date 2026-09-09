@@ -1,1 +1,2 @@
 "NSBluetoothAlwaysUsageDescription" = "MakLock uses Bluetooth to detect your Apple Watch for proximity unlock.";
+"NSAppleEventsUsageDescription" = "MakLock uses System Events only when you confirm the Restart Mac button on an unauthorized display alert.";
