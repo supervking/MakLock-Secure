@@ -1,2 +1,3 @@
-"NSBluetoothAlwaysUsageDescription" = "MakLock uses Bluetooth to detect your Apple Watch for proximity unlock.";
-"NSAppleEventsUsageDescription" = "MakLock uses System Events only when you confirm the Restart Mac button on an unauthorized display alert.";
+"CFBundleDisplayName" = "Maclock Secure MacOS";
+"NSBluetoothAlwaysUsageDescription" = "Maclock Secure MacOS uses Bluetooth to detect your Apple Watch for proximity unlock.";
+"NSAppleEventsUsageDescription" = "Maclock Secure MacOS uses System Events only when you confirm the Restart Mac button on an unauthorized display alert.";

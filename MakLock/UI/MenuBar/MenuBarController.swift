@@ -105,7 +105,10 @@ final class MenuBarController {
             symbolName = "exclamationmark.shield.fill"
         }
 
-        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "MakLock")
+        let image = NSImage(
+            systemSymbolName: symbolName,
+            accessibilityDescription: String(localized: "MakLock")
+        )
 
         if iconState == .displayAlert {
             let configuration = NSImage.SymbolConfiguration(paletteColors: [.systemRed])
@@ -116,7 +119,7 @@ final class MenuBarController {
             return
         }
 
-        button.toolTip = "MakLock"
+        button.toolTip = String(localized: "MakLock")
 
         // Add a small badge dot for locked state
         if iconState == .locked, let baseImage = image {

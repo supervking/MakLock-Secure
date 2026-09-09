@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="Resources/icon.png" width="128" height="128" alt="MakLock icon">
+  <img src="Resources/icon-maclock.png" width="128" height="128" alt="Maclock Secure MacOS icon">
 </p>
 
-<h1 align="center">MakLock Secure</h1>
+<h1 align="center">Maclock Secure MacOS</h1>
 
 <p align="center">
-  A bilingual macOS application locker with persistent authentication overlays.
+  Open-source macOS app locking for remote-computer privacy and shoulder-surfing protection.
 </p>
 
 <p align="center">
-  <a href="README.zh-CN.md">简体中文</a> · English
+  <a href="README.zh-CN.md">简体中文：MAC锁屏加密应用</a> · English
 </p>
 
 <p align="center">
@@ -22,76 +22,89 @@
 
 ## Download
 
-Download the current package from [GitHub Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
+Download [Maclock Secure MacOS 1.5.2](https://github.com/supervking/MakLock-Secure/releases/tag/v1.5.2) for macOS 13 or later:
 
-`MakLock-1.5.1-macos-universal.dmg` is the recommended drag-and-drop installer for macOS 13 or later on Apple Silicon and Intel Macs. Open it and drag `MakLock.app` to `Applications`. The ZIP remains available as an alternative package.
+- [Universal DMG](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.2/Maclock-Secure-MacOS-1.5.2-universal.dmg) — recommended drag-and-drop installer
+- [Universal ZIP](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.2/Maclock-Secure-MacOS-1.5.2-universal.zip) — alternative package
+- SHA-256 files are published beside both downloads
 
-> The release is ad-hoc signed and is not Apple-notarized. On first launch, macOS may require you to confirm the app in **System Settings → Privacy & Security**. Verify the accompanying SHA-256 file before opening a downloaded package.
+The application is distributed as an ad-hoc-signed, non-notarized universal build for Apple Silicon and Intel Macs. Verify the SHA-256 file before opening it. macOS may require first-launch approval in **System Settings → Privacy & Security**.
 
-## What is MakLock Secure?
+## What it protects
 
-MakLock Secure is an independent maintenance release of [MakLock](https://github.com/dutkiewiczmaciej/MakLock). It protects selected macOS applications with Touch ID, Apple Watch proximity, or a backup password. When a protected application is activated, MakLock displays an overlay until authentication succeeds.
+Maclock Secure MacOS places an authentication overlay over selected applications whenever they launch or return to the foreground. It is designed for shared Macs, unattended remote workstations, and computers that remain signed in while their owner is away.
 
-## Security changes in 1.1.1
+| Situation | Protection |
+|---|---|
+| Someone opens a protected app locally | A full-screen password or Touch ID challenge covers its contents |
+| A remote-control connection drops | Optional network-loss protection locks protected apps after a bounded delay |
+| The Mac becomes idle or sleeps | Protected apps are locked; selected apps can optionally close |
+| A display is added, removed, mirrored, or replaced | The desktop is hidden and a persistent red owner-authentication alert is shown |
+| A display is connected and removed quickly | The structural event remains latched in the alert and 12-hour security history |
+| A remote session regains focus | Password input regains keyboard focus without sending keystrokes to the protected app |
 
-- The lock overlay no longer dismisses itself after an inactivity timer.
-- Release builds contain no global keyboard shortcut that dismisses a lock overlay.
-- Automatic in-app updating is disabled so a verified build is not silently replaced.
-- The application interface is available in English and Simplified Chinese.
+### Remote-computer privacy and anti-peeping
 
-## Features
+The recommended remote-work profile is password-first locking, network-loss protection, trusted-display protection, idle locking, and a backup password stored in the macOS Keychain. Together these controls reduce casual local viewing of chat, browser, messaging, password, and administration applications on an unattended Mac.
 
-- Touch ID authentication with backup-password fallback
-- Optional Apple Watch proximity unlock
-- Full-screen overlays across multiple displays
-- Locking after an idle timeout of up to 2 hours, or when the Mac sleeps
-- Optional auto-close for selected protected applications
-- First-launch onboarding and menu-bar settings
-- English and Simplified Chinese interface
-- In-app language selection: Follow System, English, or Simplified Chinese
-- Password-first lock screen for remote and keyboard-only Macs; the password field is focused automatically and Return submits it
-- Password input recovers keyboard focus after long idle periods, remote-session focus changes, or another window taking focus
-- Optional locking after every internet-connectivity probe fails continuously for 1, 2, or 5 minutes
-- Optional trusted-display protection: structural display changes immediately hide the desktop; a silent red full-screen warning, macOS notification, and red menu-bar shield remain active after an unauthorized configuration is confirmed
-- Brief structural display connections remain latched after the trusted setup returns, so a quick connect-and-disconnect still requires owner authentication and remains visible in the 12-hour security history; resolution-only changes are ignored
-- Optional owner-configured emergency restart recovery stays in local application state; the alert exposes a normal restart control but never displays private recovery settings or progress
+The product protects application visibility inside the current signed-in macOS account. It does **not** encrypt a remote-desktop protocol, block privileged screenshots, defeat an administrator or root user, replace FileVault, or replace the macOS login screen.
 
-Network recovery never unlocks protected apps automatically. An unauthorized-display alert cannot be dismissed until the trusted display configuration returns and the user authenticates. Display fingerprints detect ordinary monitor additions and replacements, but passive splitters or hardware that perfectly clones a trusted display's EDID may not be distinguishable by macOS.
+See the [complete Simplified Chinese screenshot gallery](README.zh-CN.md#应用页面截图).
 
-- Optional restart cleanup closes automatically restored protected apps during a one-time 90-second window after a real Mac reboot; remote-access and system apps are always excluded
-- Password focus is restored after the macOS user session becomes active or screens wake, so remote users can type without clicking the password field
-- Password entry uses a native AppKit secure field and verifies the actual first responder instead of relying only on SwiftUI focus state
-- Password mode uses an activating overlay and temporarily hides the protected app so typed secrets cannot fall through to it when macOS restores another foreground application
-- Progressive password protection applies 2-second, 4-second, 30-second, and 5-minute delays, then blocks password unlock for 3 hours after five failures within 30 minutes
-- Security history stores only non-sensitive events from the latest 12 hours, capped at 200 records
+## Current security features
 
-Password lockout state is stored in the macOS Keychain and survives MakLock restarts and Mac reboots. Touch ID and Apple Watch remain available during a password-only lockout.
+### Authentication and application locking
 
-Emergency restart recovery is disabled by default. Configure it only from the authenticated **Settings → Security → Emergency Display Recovery** section. Its local state is synchronously persisted before a requested restart so application signature updates cannot block unattended startup. It bypasses only the display-wide alert for the validated boot; protected apps remain closed and continue to require normal MakLock authentication.
+- Backup-password authentication with password-first remote and keyboard-only operation
+- Touch ID when macOS reports an enrolled biometric sensor or paired Touch ID keyboard
+- Optional Apple Watch proximity unlock with wrist-state checks
+- Authentication on application launch and/or foreground activation
+- Full-screen overlays across all connected displays
+- Native AppKit secure password input with verified keyboard focus
+- No release-build skip button or global overlay-dismiss shortcut
 
-## Free and commercial options
+### Remote, idle, and session protection
 
-MakLock Secure is free to download and its source is available under the MIT License. The table below is a pricing-and-scope snapshot reviewed on **2026-08-17**, not an independent security evaluation. Commercial pricing and features can change, and App Store prices vary by storefront.
+- Idle timeout from 1 minute to 2 hours
+- Locking when the Mac sleeps or the Apple Watch leaves range
+- Optional per-application auto-close after inactivity
+- Optional network-loss locking after all probes fail continuously for 1, 2, or 5 minutes
+- Network recovery never unlocks protected applications automatically
+- Session-focus recovery for remote-control reconnects and screen wake
 
-| | MakLock Secure | AppLocker | Cisdem AppCrypt for Mac |
-|---|---|---|---|
-| Price / access | Free download; MIT-licensed source | Free download with in-app purchases; the US App Store lists $2.99/month, $11.99/year, or $17.99 lifetime access | 3-day full-feature trial; the vendor's 1-Mac offer lists $19.99/year or $39.99 one-time purchase |
-| Published app-lock options | Touch ID, Apple Watch proximity, or backup password | Password, Touch ID, Bluetooth ID, or Network ID | Password-protected app locking, plus app allowlist mode |
-| Other published scope | Per-app overlay locking, idle/sleep locking, optional auto-close | Access history | Website blocking, schedules, and automatic re-locking |
-| Source availability | Yes — this repository | Not stated on the cited App Store listing | Not stated on the cited vendor pages |
+### Display privacy and emergency recovery
 
-Sources: [AppLocker on the US App Store](https://apps.apple.com/us/app/applocker-passcode-lock-apps/id1132845904?platform=mac), [Cisdem AppCrypt features and trial](https://www.cisdem.com/appcrypt.html), and [Cisdem AppCrypt for Mac pricing](https://www.cisdem.com/appcrypt-mac/buy.html). Verify current terms and pricing with the vendor before purchasing.
+- Trusted-display fingerprints for detecting ordinary additions, removals, replacements, mirroring, and unmirroring
+- Immediate desktop shielding followed by a persistent red alert, silent macOS notification, and red menu-bar state
+- Brief connect-then-disconnect events remain latched even if the trusted topology returns before evaluation finishes
+- Resolution, refresh-rate, display-sleep, and desktop-shape-only changes are excluded from structural tamper alerts
+- Owner-configured hidden restart recovery can bypass only the display-wide alert after the complete validated sequence; protected apps remain closed and authenticated separately
+- Optional one-time post-restart cleanup for automatically restored protected applications
+
+### Local state and evidence
+
+- Backup password and password-attempt throttling are stored in the macOS Keychain
+- Progressive retry delays and a 3-hour password lockout after five failures within 30 minutes
+- Non-sensitive security events are retained locally for 12 hours, capped at 200 records
+- English and Simplified Chinese interface with an in-app language selector
 
 ## Installation
 
-1. Download the latest DMG from [Releases](https://github.com/supervking/MakLock-Secure/releases/latest).
-2. Compare the DMG with its published `.sha256` file.
+1. Download the latest DMG and its `.sha256` file.
+2. Verify the checksum.
 3. Open the DMG and drag `MakLock.app` to `Applications`.
-4. Open MakLock and set a backup password before adding protected applications.
+4. Approve first launch in **System Settings → Privacy & Security** if macOS requests it.
+5. Set a backup password before adding protected applications.
 
-To change the interface language, open **Settings → General → Language**, choose Follow System, English, or Simplified Chinese, then select **Restart MakLock**.
+For an unattended remote Mac, enable **Prefer password on lock screen**, **Lock after internet connection is lost**, **Lock when the trusted display setup changes**, and an appropriate idle timeout.
 
-For remote or keyboard-only Macs, **Settings → Security → Prefer password on lock screen** is enabled by default. The password field receives focus automatically; enter the password and press Return to unlock. Disable this setting if you prefer the original Touch ID-first flow.
+## Compatibility
+
+- macOS 13 or later
+- Apple Silicon and Intel Macs
+- Touch ID is optional; desktop Macs require a compatible paired Touch ID keyboard
+- Apple Watch is optional
+- No cloud account or subscription is required
 
 ## Build from source
 
@@ -101,11 +114,11 @@ cd MakLock-Secure
 xcodebuild -project MakLock.xcodeproj -scheme MakLock -configuration Release CODE_SIGNING_ALLOWED=NO build
 ```
 
-Requires Xcode 15 or later and macOS 13 or later.
+Requires Xcode 15 or later. The stable bundle identifier remains `com.makmak.MakLock` for settings and Keychain compatibility.
 
 ## Security boundaries
 
-MakLock protects application access within an active macOS account. It is not a replacement for a separate macOS user account, FileVault, or the macOS lock screen. Keep your backup password private and lock your Mac when leaving it unattended.
+Maclock Secure MacOS is an application-access control inside an active user session. A user with administrator/root access, physical access sufficient to alter the operating system, or screen-capture privileges may bypass application-level controls. Passive display splitters or hardware that perfectly clones a trusted display's EDID may also be indistinguishable to macOS. Use a separate macOS account, FileVault, system screen locking, secured remote-access credentials, and physical access controls where appropriate.
 
 ## Attribution and license
 
