@@ -156,6 +156,8 @@ enum SecurityEventKind: String, Codable {
 
 enum SecurityEventAction: String, Codable {
     case locked
+    case alertShown
+    case alertDismissed
     case gracefulQuit
     case forcedQuit
     case retryDelayed
