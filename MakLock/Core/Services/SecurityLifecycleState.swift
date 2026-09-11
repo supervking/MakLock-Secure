@@ -356,6 +356,7 @@ enum SecurityEventKind: String, Codable {
     case passwordFailure
     case passwordLockout
     case blockedPasswordAttempt
+    case passwordRecovery
     case sessionFocusRecovery
     case emergencyRestartRecovery
 }
@@ -368,6 +369,7 @@ enum SecurityEventAction: String, Codable {
     case forcedQuit
     case retryDelayed
     case passwordBlocked
+    case passwordReset
     case focusRestored
     case restartRequested
     case restartFailed

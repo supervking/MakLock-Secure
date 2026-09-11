@@ -19,6 +19,47 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app
 
+      - name: Run security state tests
+        run: |
+          set -euo pipefail
+          test_output_dir="$(mktemp -d)"
+          trap 'rm -rf "$test_output_dir"' EXIT
+
+          swiftc MakLock/Core/Services/SecurityLifecycleState.swift \
+            Tests/SecurityLifecycleStateTests.swift \
+            -o "$test_output_dir/security-lifecycle-tests"
+          "$test_output_dir/security-lifecycle-tests"
+
+          swiftc MakLock/Core/Services/SecurityLifecycleState.swift \
+            MakLock/Core/Services/SecurityEventState.swift \
+            Tests/SecurityEventStateTests.swift \
+            -o "$test_output_dir/security-event-tests"
+          "$test_output_dir/security-event-tests"
+
+          swiftc MakLock/Core/Services/SecurityLifecycleState.swift \
+            MakLock/Core/Services/SecurityEventState.swift \
+            MakLock/Core/Storage/KeychainManager.swift \
+            MakLock/Models/AuthMethod.swift \
+            Tests/PasswordRecoveryTests.swift \
+            -o "$test_output_dir/password-recovery-tests"
+          "$test_output_dir/password-recovery-tests"
+
+          swiftc MakLock/Core/Services/SecurityLifecycleState.swift \
+            MakLock/Core/Services/SecurityEventState.swift \
+            MakLock/Models/AuthMethod.swift \
+            MakLock/Core/Storage/KeychainManager.swift \
+            MakLock/Core/Services/SystemBootIdentity.swift \
+            MakLock/Core/Services/PasswordAttemptLimiter.swift \
+            MakLock/Core/Services/AuthenticationService.swift \
+            Tests/AuthenticationInterruptionTests.swift \
+            -o "$test_output_dir/authentication-interruption-tests"
+          "$test_output_dir/authentication-interruption-tests"
+
+          swiftc MakLock/UI/LockOverlay/FocusableSecureField.swift \
+            Tests/PasswordFieldInteractionTests.swift \
+            -o "$test_output_dir/password-field-tests"
+          "$test_output_dir/password-field-tests"
+
       - name: Build
         run: |
           set -o pipefail

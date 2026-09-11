@@ -19,25 +19,11 @@ final class SettingsAuthService {
             && (watch.isWatchUnlocked ?? true)
     }
 
-    /// Whether no authentication method is available (safety valve).
-    /// If the user has no Touch ID and no backup password, we can't gate settings
-    /// or they'd be locked out permanently.
-    private var hasNoAuthMethod: Bool {
-        !AuthenticationService.shared.isTouchIDAvailable
-            && !KeychainManager.shared.hasPassword()
-    }
-
     /// Authenticate before opening the menu bar popover.
     ///
     /// - Watch on wrist → bypass with toast
-    /// - No auth method → bypass silently (safety valve)
     /// - Otherwise → native Touch ID dialog with macOS password fallback
     func authenticate(completion: @escaping (Bool) -> Void) {
-        if hasNoAuthMethod {
-            completion(true)
-            return
-        }
-
         if canWatchBypass {
             completion(true)
             // Show toast after popover has opened
@@ -54,7 +40,7 @@ final class SettingsAuthService {
         }
 
         AuthenticationService.shared.authenticateWithSystemFallback(
-            reason: String(localized: "Access MakLock Settings")
+            reason: String(localized: "Access MakLock Settings with Mac Login")
         ) { result in
             switch result {
             case .success:

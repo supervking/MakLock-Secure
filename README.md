@@ -22,10 +22,10 @@
 
 ## Download
 
-Download [Maclock Secure MacOS 1.5.2](https://github.com/supervking/MakLock-Secure/releases/tag/v1.5.2) for macOS 13 or later:
+Download [Maclock Secure MacOS 1.5.3](https://github.com/supervking/MakLock-Secure/releases/tag/v1.5.3) for macOS 13 or later:
 
-- [Universal DMG](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.2/Maclock-Secure-MacOS-1.5.2-universal.dmg) — recommended drag-and-drop installer
-- [Universal ZIP](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.2/Maclock-Secure-MacOS-1.5.2-universal.zip) — alternative package
+- [Universal DMG](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.3/Maclock-Secure-MacOS-1.5.3-universal.dmg) — recommended drag-and-drop installer
+- [Universal ZIP](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.3/Maclock-Secure-MacOS-1.5.3-universal.zip) — alternative package
 - SHA-256 files are published beside both downloads
 
 The application is distributed as an ad-hoc-signed, non-notarized universal build for Apple Silicon and Intel Macs. Verify the SHA-256 file before opening it. macOS may require first-launch approval in **System Settings → Privacy & Security**.
@@ -61,6 +61,9 @@ See the [complete Simplified Chinese screenshot gallery](README.zh-CN.md#应用�
 - Authentication on application launch and/or foreground activation
 - Full-screen overlays across all connected displays
 - Native AppKit secure password input with verified keyboard focus
+- Owner-authenticated password recovery from the primary trusted lock screen
+- Keychain access errors are reported separately and never counted as wrong-password attempts
+- Interrupted macOS authentication restores lock-screen input without requiring a restart
 - No release-build skip button or global overlay-dismiss shortcut
 
 ### Remote, idle, and session protection

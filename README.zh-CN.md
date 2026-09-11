@@ -24,10 +24,10 @@
 
 ## 下载
 
-下载适用于 macOS 13 及以上版本的 [Maclock Secure MacOS 1.5.2](https://github.com/supervking/MakLock-Secure/releases/tag/v1.5.2)：
+下载适用于 macOS 13 及以上版本的 [Maclock Secure MacOS 1.5.3](https://github.com/supervking/MakLock-Secure/releases/tag/v1.5.3)：
 
-- [通用版 DMG](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.2/Maclock-Secure-MacOS-1.5.2-universal.dmg)——推荐的拖拽安装包
-- [通用版 ZIP](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.2/Maclock-Secure-MacOS-1.5.2-universal.zip)——备用压缩包
+- [通用版 DMG](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.3/Maclock-Secure-MacOS-1.5.3-universal.dmg)——推荐的拖拽安装包
+- [通用版 ZIP](https://github.com/supervking/MakLock-Secure/releases/download/v1.5.3/Maclock-Secure-MacOS-1.5.3-universal.zip)——备用压缩包
 - 两个安装包都附带独立 SHA-256 校验文件
 
 发布包同时支持 Apple Silicon 和 Intel Mac，采用 ad-hoc 本地签名，尚未经过 Apple 公证。打开前请核对 SHA-256；首次运行时，macOS 可能要求在“系统设置 → 隐私与安全性”中确认打开。
@@ -73,6 +73,9 @@ MAC锁屏加密应用可为当前 macOS 账户中的指定应用增加独立认�
 - 可选 Apple Watch 接近解锁及佩戴状态判断
 - 所有显示器上的全屏遮挡层
 - 原生 AppKit 安全密码输入与真实第一响应者检查
+- 可在主可信显示器的锁屏中通过 Mac 所有者认证重置应用密码
+- Keychain 访问异常会单独提示，不会计为密码错误
+- macOS 系统认证中断后会恢复锁屏输入，无需重新启动电脑
 - 正式版本不存在开发跳过按钮或全局解除锁定快捷键
 
 ### 远程、闲置与会话保护

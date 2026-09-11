@@ -123,11 +123,15 @@ final class OverlayWindowService {
         }
         for window in overlayWindows {
             window.ignoresMouseEvents = active
+            window.setPasswordInputMode(!active && isPasswordInputEnabled)
         }
     }
 
     /// Enable key window status on overlay windows (needed for password input).
     func enableKeyboardInput() {
+        guard isShowing,
+              !AuthenticationService.shared.isAuthenticating,
+              !isTouchIDMode else { return }
         isPasswordInputEnabled = true
         isTouchIDMode = false
         setTouchIDMode(false)
@@ -184,6 +188,7 @@ final class OverlayWindowService {
 
     private func makePasswordWindowKeyAndFocusField() -> Bool {
         guard isShowing,
+              !AuthenticationService.shared.isAuthenticating,
               isPasswordInputEnabled,
               !isTouchIDMode,
               !DisplayIntrusionAlertService.shared.isShowing else {
@@ -231,6 +236,7 @@ final class OverlayWindowService {
                     appName: app.name,
                     bundleIdentifier: app.bundleIdentifier,
                     isPrimary: false,
+                    displayID: DisplaySecurityMonitor.descriptor(for: screens[screenIndex])?.displayID,
                     onDismiss: { [weak self] in
                         let name = self?.currentApp?.name ?? "app"
                         self?.hide()
@@ -257,6 +263,7 @@ final class OverlayWindowService {
                 appName: app.name,
                 bundleIdentifier: app.bundleIdentifier,
                 isPrimary: isPrimary,
+                displayID: DisplaySecurityMonitor.descriptor(for: screen)?.displayID,
                 onDismiss: { [weak self] in
                     let name = self?.currentApp?.name ?? "app"
                     self?.hide()

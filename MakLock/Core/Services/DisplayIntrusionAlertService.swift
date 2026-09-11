@@ -223,6 +223,8 @@ final class DisplayIntrusionAlertService {
     }
 
     func authenticateWithSystemPassword() {
+        guard !AuthenticationService.shared.isAuthenticating,
+              !model.isSystemAuthenticationInProgress else { return }
         let status = DisplaySecurityMonitor.currentConfigurationStatus()
         guard status.isTrusted else {
             model.errorMessage = String(
@@ -254,6 +256,8 @@ final class DisplayIntrusionAlertService {
     @discardableResult
     func focusPasswordField() -> Bool {
         guard isShowing,
+              !AuthenticationService.shared.isAuthenticating,
+              !model.isSystemAuthenticationInProgress,
               state.phase == .intrusion,
               model.configurationIsTrusted,
               KeychainManager.shared.hasPassword(),
@@ -270,7 +274,9 @@ final class DisplayIntrusionAlertService {
     func restoreFocusAfterSessionActivation(
         completion: @escaping (Bool) -> Void
     ) -> Bool {
-        guard isShowing, state.phase == .intrusion else { return false }
+        guard isShowing, state.phase == .intrusion,
+              !AuthenticationService.shared.isAuthenticating,
+              !model.isSystemAuthenticationInProgress else { return false }
 
         focusRecoveryGeneration += 1
         let generation = focusRecoveryGeneration
@@ -279,6 +285,8 @@ final class DisplayIntrusionAlertService {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                 guard let self,
                       generation == self.focusRecoveryGeneration,
+                      !AuthenticationService.shared.isAuthenticating,
+                      !self.model.isSystemAuthenticationInProgress,
                       self.isShowing,
                       self.state.phase == .intrusion else {
                     return
@@ -345,7 +353,8 @@ final class DisplayIntrusionAlertService {
             window.setAllowsKeyStatus(allowsAuthentication)
             window.contentView = NSHostingView(rootView: DisplayIntrusionAlertView(
                 model: model,
-                allowsAuthentication: allowsAuthentication
+                allowsAuthentication: allowsAuthentication,
+                presentedDisplayID: DisplaySecurityMonitor.descriptor(for: screen)?.displayID
             ))
             window.orderFront(nil)
             windows.append(window)
@@ -396,6 +405,8 @@ final class DisplayIntrusionAlertService {
     }
 
     private func bringAlertWindowsForward() {
+        guard !AuthenticationService.shared.isAuthenticating,
+              !model.isSystemAuthenticationInProgress else { return }
         NSApp.activate(ignoringOtherApps: true)
         windows.forEach { $0.orderFrontRegardless() }
         authenticationWindow()?.makeKeyAndOrderFront(nil)
@@ -405,6 +416,15 @@ final class DisplayIntrusionAlertService {
         windows.forEach { $0.setSystemAuthenticationMode(active) }
         if !active {
             bringAlertWindowsForward()
+        }
+    }
+
+    func setPasswordRecoveryAuthenticationMode(_ active: Bool) {
+        model.isSystemAuthenticationInProgress = active
+        focusRecoveryGeneration += 1
+        setSystemAuthenticationMode(active)
+        if !active, isShowing {
+            focusPasswordFieldSoon()
         }
     }
 
@@ -492,6 +512,8 @@ private final class DisplayIntrusionAlertWindow: NSPanel {
 private struct DisplayIntrusionAlertView: View {
     @ObservedObject var model: DisplayIntrusionAlertModel
     let allowsAuthentication: Bool
+    let presentedDisplayID: CGDirectDisplayID?
+    @State private var isPasswordRecoveryActive = false
 
     var body: some View {
         ZStack {
@@ -576,21 +598,40 @@ private struct DisplayIntrusionAlertView: View {
         if allowsAuthentication {
             if model.configurationIsTrusted {
                 VStack(spacing: 14) {
-                    Text("Display connection restored. Enter your MakLock password to restore the desktop.")
-                        .font(.headline)
-                        .foregroundColor(.white)
+                    if !isPasswordRecoveryActive {
+                        Text("Display connection restored. Enter your MakLock password to restore the desktop.")
+                            .font(.headline)
+                            .foregroundColor(.white)
 
-                    if KeychainManager.shared.hasPassword() {
-                        DisplayIntrusionPasswordView(model: model)
-                    } else {
-                        Button("Authenticate with Mac Password") {
-                            DisplayIntrusionAlertService.shared.authenticateWithSystemPassword()
+                        if KeychainManager.shared.hasPassword() {
+                            DisplayIntrusionPasswordView(model: model)
+                        } else {
+                            Button("Authenticate with Mac Login Password") {
+                                DisplayIntrusionAlertService.shared.authenticateWithSystemPassword()
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.white)
+                            .foregroundColor(.red)
+                            .disabled(model.isSystemAuthenticationInProgress)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.white)
-                        .foregroundColor(.red)
-                        .disabled(model.isSystemAuthenticationInProgress)
                     }
+
+                    PasswordRecoveryControls(
+                        presentedDisplayID: presentedDisplayID,
+                        onAuthenticationModeChanged: { active in
+                            DisplayIntrusionAlertService.shared
+                                .setPasswordRecoveryAuthenticationMode(active)
+                        },
+                        onFlowActiveChanged: { active in
+                            isPasswordRecoveryActive = active
+                            if !active {
+                                DispatchQueue.main.async {
+                                    _ = DisplayIntrusionAlertService.shared.focusPasswordField()
+                                }
+                            }
+                        }
+                    )
+                    .id("display-password-recovery-controls")
                 }
                 .padding(.top, 8)
             } else {
@@ -714,6 +755,7 @@ private struct DisplayIntrusionPasswordView: View {
     }
 
     private func refreshPasswordAccessDecision() {
+        guard !AuthenticationService.shared.isAuthenticating else { return }
         let previousDecision = passwordAccessDecision
         passwordAccessDecision = Defaults.shared.passwordBruteForceProtectionEnabled
             ? PasswordAttemptLimiter.shared.currentDecision()

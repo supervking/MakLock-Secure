@@ -340,23 +340,17 @@ struct SecuritySettingsView: View {
     }
 
     private func savePassword() {
-        guard !newPassword.isEmpty else {
-            passwordError = String(localized: "Password cannot be empty.")
+        let validation = PasswordSetupPolicy.validate(
+            password: newPassword,
+            confirmation: confirmPassword
+        )
+        guard validation == .valid else {
+            passwordError = validation.localizedMessage
             return
         }
 
-        guard newPassword.count >= 4 else {
-            passwordError = String(localized: "Password must be at least 4 characters.")
-            return
-        }
-
-        guard newPassword == confirmPassword else {
-            passwordError = String(localized: "Passwords do not match.")
-            return
-        }
-
-        let saved = KeychainManager.shared.savePassword(newPassword)
-        if saved {
+        let result = KeychainManager.shared.savePassword(newPassword)
+        if result.succeeded {
             Defaults.shared.isBackupPasswordSet = true
             hasBackupPassword = true
             showPasswordSheet = false
@@ -448,6 +442,8 @@ struct SecuritySettingsView: View {
             return "Password locked"
         case .blockedPasswordAttempt:
             return "Blocked password attempt"
+        case .passwordRecovery:
+            return "App password recovery"
         case .sessionFocusRecovery:
             return "Password focus restored"
         case .emergencyRestartRecovery:
@@ -487,6 +483,8 @@ struct SecuritySettingsView: View {
             return String(localized: "Retry delayed")
         case .passwordBlocked:
             return String(localized: "Password blocked")
+        case .passwordReset:
+            return String(localized: "Password reset")
         case .focusRestored:
             return String(localized: "Focus restored")
         case .restartRequested:

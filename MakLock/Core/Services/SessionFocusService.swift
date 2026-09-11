@@ -56,6 +56,7 @@ final class SessionFocusService {
         pendingRecovery?.cancel()
 
         let workItem = DispatchWorkItem {
+            guard !AuthenticationService.shared.isAuthenticating else { return }
             let recordResult: (Bool) -> Void = { succeeded in
                 SecurityEventStore.shared.record(
                     kind: .sessionFocusRecovery,
