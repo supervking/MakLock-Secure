@@ -18,6 +18,7 @@ final class PasswordFieldFocusCoordinator {
 
     @discardableResult
     func focusPrimaryField() -> Bool {
+        guard !AuthenticationService.shared.isAuthenticating else { return false }
         let primaryScreen = NSScreen.main ?? NSScreen.screens.first
         let field = fields.allObjects.first(where: {
             $0.window?.screen?.frame == primaryScreen?.frame
@@ -30,6 +31,9 @@ final class PasswordFieldFocusCoordinator {
             return false
         }
 
+        if window.isKeyWindow, let editor = field.currentEditor(), window.firstResponder === editor {
+            return true
+        }
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         guard window.makeFirstResponder(field) else { return false }
@@ -73,6 +77,7 @@ struct FocusableSecureField: NSViewRepresentable {
         field.focusRingType = .default
         field.font = .systemFont(ofSize: NSFont.systemFontSize)
         field.delegate = context.coordinator
+        field.cell?.sendsActionOnEndEditing = false
         field.target = context.coordinator
         field.action = #selector(Coordinator.submit)
         field.onInteraction = onInteraction
@@ -108,7 +113,8 @@ struct FocusableSecureField: NSViewRepresentable {
             parent.text = field.stringValue
         }
 
-        @objc func submit() {
+        @objc func submit(_ sender: NSSecureTextField) {
+            parent.text = sender.stringValue
             parent.onSubmit()
         }
     }

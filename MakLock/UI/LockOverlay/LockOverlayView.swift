@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreGraphics
 
 /// The lock overlay UI: blur background with centered authentication card.
 /// Password-first is the default; Touch ID remains an optional fallback.
@@ -6,6 +7,7 @@ struct LockOverlayView: View {
     let appName: String
     let bundleIdentifier: String
     let isPrimary: Bool
+    let displayID: CGDirectDisplayID?
     let onDismiss: () -> Void
 
     @State private var isVisible = false
@@ -43,6 +45,14 @@ struct LockOverlayView: View {
                         OverlayWindowService.shared.disableKeyboardInput()
                         showPasswordInput = false
                         attemptTouchID()
+                    },
+                    showsPasswordRecovery: isPrimary,
+                    presentedDisplayID: displayID,
+                    onRecoveryAuthenticationModeChanged: { active in
+                        OverlayWindowService.shared.setTouchIDMode(active)
+                        if !active {
+                            OverlayWindowService.shared.enableKeyboardInput()
+                        }
                     }
                 )
                 .transition(.opacity)
@@ -128,6 +138,7 @@ struct LockOverlayView: View {
     }
 
     private func attemptTouchID() {
+        guard isPrimary, !AuthenticationService.shared.isAuthenticating else { return }
         authState = .authenticating
         errorMessage = nil
 

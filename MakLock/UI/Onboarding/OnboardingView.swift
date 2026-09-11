@@ -201,21 +201,17 @@ private struct PasswordSetupStep: View {
     }
 
     private func savePassword() {
-        guard !password.isEmpty else {
-            errorMessage = String(localized: "Password cannot be empty.")
-            return
-        }
-        guard password.count >= 4 else {
-            errorMessage = String(localized: "Password must be at least 4 characters.")
-            return
-        }
-        guard password == confirmPassword else {
-            errorMessage = String(localized: "Passwords do not match.")
+        let validation = PasswordSetupPolicy.validate(
+            password: password,
+            confirmation: confirmPassword
+        )
+        guard validation == .valid else {
+            errorMessage = validation.localizedMessage
             return
         }
 
-        let saved = KeychainManager.shared.savePassword(password)
-        if saved {
+        let result = KeychainManager.shared.savePassword(password)
+        if result.succeeded {
             Defaults.shared.isBackupPasswordSet = true
             withAnimation(MakLockAnimations.standard) {
                 isSaved = true
